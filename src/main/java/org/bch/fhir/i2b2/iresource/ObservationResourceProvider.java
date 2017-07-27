@@ -13,7 +13,7 @@ import org.bch.fhir.i2b2.exception.FHIRI2B2Exception;
 import org.bch.fhir.i2b2.external.I2B2CellFR;
 import org.bch.fhir.i2b2.service.FHIRToPDO;
 import org.bch.fhir.i2b2.service.ObservationToI2B2;
-
+import org.bch.fhir.i2b2.external.I2B2CellFR.UploadI2B2Response;
 import java.io.IOException;
 
 /**
@@ -47,21 +47,28 @@ public class ObservationResourceProvider implements IResourceProvider {
         log.info("New POST Observation");
 
         String xmlpdo = null;
+
         try {
             xmlpdo = mapper.getPDOXML(obs);
-            i2b2.pushPDOXML(xmlpdo);
-        } catch (FHIRI2B2Exception e) {
+            UploadI2B2Response response = i2b2.pushPDOXML(xmlpdo);
+            int nObservations = response.getTotalRecords(I2B2CellFR.XmlPdoTag.TAG_OBSERVATIONS);
+            log.info("total records inserted: " + nObservations);
+            if (nObservations < 0) {
+                throw new InternalErrorException("Failed inserting observation");
+            }
+            MethodOutcome outcome = new MethodOutcome();
+            outcome.setCreated(nObservations>= 1);
+            outcome.setResource(obs);
+
+            return outcome;
+
+        } catch (Exception e) {
             // We return 500!
-            log.error("Error POST QuestionnaireAnswers:" + e.getMessage());
-            e.printStackTrace();
-            throw new InternalErrorException(e.getMessage());
-        } catch (IOException e) {
-            log.error("Error POST QuestionnaireAnswers IOException:" + e.getMessage());
             e.printStackTrace();
             throw new InternalErrorException(e.getMessage());
         }
 
-        return new MethodOutcome();
+
     }
 
 }
