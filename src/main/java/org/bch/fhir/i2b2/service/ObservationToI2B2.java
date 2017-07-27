@@ -17,12 +17,15 @@ import org.bch.fhir.i2b2.exception.FHIRI2B2Exception;
 import org.bch.fhir.i2b2.pdomodel.Element;
 import org.bch.fhir.i2b2.pdomodel.ElementSet;
 import org.bch.fhir.i2b2.pdomodel.PDOModel;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+
 
 /**
  * Generates the i2b2 pdo xml equivalent for fhir Observation resource
@@ -72,22 +75,23 @@ public class ObservationToI2B2 extends FHIRToPDO {
 
     private Encounter findEncounter(Observation obs) throws FHIRI2B2Exception {
         ResourceReferenceDt refEncounter = obs.getEncounter();
+        Encounter enc = null;
+        String idEnc = null;
         if (!refEncounter.isEmpty()) {
-            String idEnc = refEncounter.getReference().getIdPart();
+            idEnc = refEncounter.getReference().getIdPart();
+            log.info("idEnc " + idEnc);
             ContainedDt containedDt = obs.getContained();
             List<IResource> iResources = containedDt.getContainedResources();
-            IResource encRes = findResourceById(iResources, idEnc);
-            if (encRes == null) {
-                log.warn("Encounter reference not found in contained list. A random encounter number will be generate");
-            } else {
-                Encounter enc = (Encounter) encRes;
-                return enc;
-            }
-        } else {
-            log.warn("Encounter reference not found in contained list. A random encounter number will be generate");
+            enc = (Encounter) findResourceById(iResources, idEnc);
         }
-
-        Encounter enc = new Encounter();
+        if (enc == null ) {
+            log.warn("Encounter reference not found in contained list. A random encounter number will be generate");
+            enc = new Encounter();
+            if (idEnc != null) {
+                enc.setId(idEnc);
+            }
+        }
+        log.info("enc.getId() " + enc.getId());
         return enc;
     }
 
