@@ -39,8 +39,8 @@ public abstract class FHIRToPDO {
     public static final String FHIR_TAG_VALUE_CODING = "valueCoding";
     public static final String FHIR_TAG_VALUE_BOOLEAN = "valueBoolean";
 
-    public static final String DEFAULT_PATIENT_SOURCE = "BCH";
-    public static final String DEFAULT_EVENT_SOURCE = "BCH";
+    public static final String DEFAULT_PATIENT_SOURCE = "HIVE";
+    public static final String DEFAULT_EVENT_SOURCE = "HIVE";
 
     protected String patientIdeSource=DEFAULT_PATIENT_SOURCE;
     protected String patientIde=null;
@@ -49,14 +49,11 @@ public abstract class FHIRToPDO {
 
     protected String getEventId(Encounter enc) throws FHIRI2B2Exception {
         String eventId = null;
-        if (enc==null) {
-            eventId = "" + new Date().getTime();
-        } else if (enc.getId().isEmpty()) {
+        if (enc == null || enc.getId().isEmpty()) {
             eventId = "" + new Date().getTime();
         } else {
-            // TODO: Provisional!!
-            eventId = "" + new Date().getTime();
-            //eventId = enc.getId().getIdPart();
+
+            eventId = enc.getId().getIdPart();
         }
         return eventId;
     }
