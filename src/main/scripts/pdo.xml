@@ -1,0 +1,8 @@
+<patient_data>
+<pid>
+<patient_id source="EMPI">1000000</patient_id>
+<patient_map_id source="MGH">123</patient_map_id>
+<patient_map_id source="BWH">777</patient_map_id>
+</pid>
+</patient_data>
+
