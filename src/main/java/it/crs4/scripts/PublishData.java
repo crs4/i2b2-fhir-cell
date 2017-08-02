@@ -27,8 +27,9 @@ public class PublishData {
             e.printStackTrace();
             System.exit(-1);
         }
-        int nObservations = response.getTotalRecords(I2B2CellFR.XmlPdoTag.TAG_OBSERVATIONS);
-        System.out.println("total records inserted: " + nObservations);
+        System.out.println("total observations inserted: " + response.getTotalRecords(I2B2CellFR.XmlPdoTag.TAG_OBSERVATIONS));
+        System.out.println("total pid inserted: " + response.getTotalRecords(I2B2CellFR.XmlPdoTag.TAG_PIDS));
+        System.out.println("total patients inserted: " + response.getTotalRecords(I2B2CellFR.XmlPdoTag.TAG_PATIENTS));
 
     }
 }
