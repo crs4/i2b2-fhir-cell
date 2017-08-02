@@ -29,6 +29,8 @@ public class PDOModel {
     public static final String PDO_SOURCE =             "source";
     public static final String PDO_COLUMN =             "column";
     public static final String PDO_TYPE =               "type";
+    public static final String PDO_BIRTH_DATE =         "birth_date";
+    public static final String PDO_UPDATE_DATE =         "update_date";
 
 
 

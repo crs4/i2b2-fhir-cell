@@ -1,8 +1,11 @@
 package org.bch.fhir.i2b2.service;
 
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu2.composite.AddressDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bch.fhir.i2b2.config.AppConfig;
@@ -14,7 +17,8 @@ import org.bch.fhir.i2b2.pdomodel.PDOModel;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.List;
+import java.util.*;
+import java.util.Date;
 
 /**
  * Generates the i2b2 pdo xml equivalent for fhir Patient resource
@@ -83,19 +87,67 @@ public class PatientToI2B2 extends FHIRToPDO {
         }
         if (!isInfoPresent) return null;
 
-        // Provisional until CRCLoader works properly with patients that already exists
-        boolean b=false;
-        try {
-            b = updateI2B2DB(zip, state, this.patientIde, this.patientIdeSource);
-        } catch (Exception e) {
-            e.printStackTrace();
+        java.util.Date birthDate = patient.getBirthDate();
+        if (birthDate != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(birthDate);
+            cal.set(Calendar.MILLISECOND, 0);
+
+            String birthDateElement = this.generateRow(
+                    PDOModel.PDO_PARAM,
+                    getTimeStampStringFromDate(birthDate),
+                    genParamStr(PDOModel.PDO_COLUMN, PDOModel.PDO_BIRTH_DATE),
+                    genParamStr(PDOModel.PDO_TYPE, "date"));
+            patientElement.addRow(birthDateElement);
         }
 
+        ResourceMetadataMap meta = patient.getResourceMetadata();
+//        System.out.println("***********meta.size()" + meta.size());
+//        System.out.println("***********meta.keySet()" + meta.keySet());
+//        System.out.println("***********meta.values()" + meta.values());
+        System.out.println("***********meta UPDATED" + meta.get(ResourceMetadataKeyEnum.UPDATED));
+//        for (Map.Entry<ResourceMetadataKeyEnum<?>, Object> entry : meta.entrySet())
+//        {
+//            System.out.println(entry.getKey() + "/" + entry.getValue());
+//        }
+
+        if (!meta.isEmpty()) {
+            InstantDt updateDate = (InstantDt) meta.get(ResourceMetadataKeyEnum.UPDATED);
+            if (updateDate != null) {
+
+                String updateDateElement = this.generateRow(
+                        PDOModel.PDO_PARAM,
+                        getTimeStampStringFromDate(updateDate.getValue()),
+                        genParamStr(PDOModel.PDO_COLUMN, PDOModel.PDO_UPDATE_DATE),
+                        genParamStr(PDOModel.PDO_TYPE, "date"));
+                patientElement.addRow(updateDateElement);
+
+            }
+
+        }
+
+
+        // Provisional until CRCLoader works properly with patients that already exists
+//        boolean b=false;
+//        try {
+//            b = updateI2B2DB(zip, state, this.patientIde, this.patientIdeSource);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
         // No need to bother i2b2, since the upload as been done directly into i2b2
-        if (b) return null;
+//        if (b) return null;
 
         patientSet.addElement(patientElement);
         return patientSet;
+    }
+
+    private String getTimeStampStringFromDate(java.util.Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.MILLISECOND, 0);
+        return (new java.sql.Timestamp(date.getTime()).toString());
+
     }
 
     // PRE: patient is not null
