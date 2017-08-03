@@ -50,6 +50,22 @@ public class PatientToI2B2 extends FHIRToPDO {
 
         return pdo.generatePDOXML();
     }
+
+    protected void addColumnParam(Element patientElement, String columnName, String type, Object value) {
+        if (value == null) return;
+
+        if (type.equals("date")) {
+            value = getTimeStampStringFromDate((java.util.Date) value);
+        }
+        patientElement.addRow(
+                this.generateRow(PDOModel.PDO_PARAM, (String) value,
+                    genParamStr(PDOModel.PDO_COLUMN, columnName),
+                    genParamStr(PDOModel.PDO_TYPE, type)
+                )
+        );
+
+    }
+
     // return null if bot zip code and state are not present
     protected ElementSet generatePatientSet(Patient patient) throws FHIRI2B2Exception {
         //<param column="sex_cd">F__PatientSegments.patientGender__F</param>
@@ -62,54 +78,35 @@ public class PatientToI2B2 extends FHIRToPDO {
                 genParamStr(PDOModel.PDO_SOURCE, this.patientIdeSource));
         patientElement.addRow(pdoPatientId);
 
+//TODO: add vital_status_cd
+
         String address = this.getAddressInfo(patient);
         String zip = address.split(SEP,0)[0];
         String state = address.split(SEP,0)[1];
-        //String zipElement = this.generateRow(PDOModel.PDO_COLUMN_ZIP_CD,zip);
-        //String stateElement = this.generateRow(PDOModel.PDO_COLUMN_STATE_PATH,state);
-
-        String zipElement = this.generateRow(PDOModel.PDO_PARAM, zip,
-                genParamStr(PDOModel.PDO_COLUMN, PDOModel.PDO_COLUMN_ZIP_CD),
-                genParamStr(PDOModel.PDO_TYPE, "string"));
-
-        String stateElement = this.generateRow(PDOModel.PDO_PARAM, state,
-                genParamStr(PDOModel.PDO_COLUMN, PDOModel.PDO_COLUMN_STATE_PATH),
-                genParamStr(PDOModel.PDO_TYPE, "string"));
 
         boolean isInfoPresent=false;
         if (zip.length()!=0) {
-            patientElement.addRow(zipElement);
+            addColumnParam(patientElement, PDOModel.PDO_COLUMN_ZIP_CD, "string", zip);
             isInfoPresent = true;
         }
         if (state.length()!=0) {
-            patientElement.addRow(stateElement);
+            addColumnParam(patientElement, PDOModel.PDO_COLUMN_STATE_PATH, "string", state);
             isInfoPresent = true;
         }
-        if (!isInfoPresent) return null;
+//        if (!isInfoPresent) return null;
 
-        java.util.Date birthDate = patient.getBirthDate();
-        if (birthDate != null) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(birthDate);
-            cal.set(Calendar.MILLISECOND, 0);
+        addColumnParam(patientElement, PDOModel.PDO_BIRTH_DATE, "date", patient.getBirthDate());
 
-            String birthDateElement = this.generateRow(
-                    PDOModel.PDO_PARAM,
-                    getTimeStampStringFromDate(birthDate),
-                    genParamStr(PDOModel.PDO_COLUMN, PDOModel.PDO_BIRTH_DATE),
-                    genParamStr(PDOModel.PDO_TYPE, "date"));
-            patientElement.addRow(birthDateElement);
-        }
+        //TODO: check why patient.getDeceased() is null
+//        addColumnParam(patientElement, PDOModel.PDO_DEATH_DATE, "date", patient.dece);
+        System.out.println("patient.getDeceased()" + patient.getDeceased());
+
+        //TODO: check if sex must be encoded as M | F in I2B2
+        addColumnParam(patientElement, PDOModel.PDO_GENDER, "string", patient.getGender());
+        addColumnParam(patientElement, PDOModel.PDO_LANGUAGE, "string", patient.getLanguage().getValue());
+
 
         ResourceMetadataMap meta = patient.getResourceMetadata();
-//        System.out.println("***********meta.size()" + meta.size());
-//        System.out.println("***********meta.keySet()" + meta.keySet());
-//        System.out.println("***********meta.values()" + meta.values());
-        System.out.println("***********meta UPDATED" + meta.get(ResourceMetadataKeyEnum.UPDATED));
-//        for (Map.Entry<ResourceMetadataKeyEnum<?>, Object> entry : meta.entrySet())
-//        {
-//            System.out.println(entry.getKey() + "/" + entry.getValue());
-//        }
 
         if (!meta.isEmpty()) {
             InstantDt updateDate = (InstantDt) meta.get(ResourceMetadataKeyEnum.UPDATED);
