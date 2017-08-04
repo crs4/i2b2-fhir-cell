@@ -1,8 +1,10 @@
 package org.bch.fhir.i2b2.service;
 
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu2.composite.AddressDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -27,6 +29,7 @@ import java.util.Date;
 public class PatientToI2B2 extends FHIRToPDO {
     Log log = LogFactory.getLog(PatientToI2B2.class);
     public static final String SEP = "##";
+    private ResourceReferenceDt org;
 
     /**
      * Override method that implements {@link FHIRToPDO#getPDOXML(BaseResource)}
@@ -40,6 +43,10 @@ public class PatientToI2B2 extends FHIRToPDO {
         PDOModel pdo = new PDOModel();
         if (patient!=null) {
             this.patientIde = this.getPatiendIde(patient);
+            org = patient.getManagingOrganization();
+            if (org != null) {
+                this.patientIdeSource = org.getReference().getIdPart();
+            }
             ElementSet patientSet = this.generatePatientSet(patient);
             pdo.addElementSet(patientSet);
             // If patientSet is null, nothing to update
@@ -57,6 +64,11 @@ public class PatientToI2B2 extends FHIRToPDO {
         if (type.equals("date")) {
             value = getTimeStampStringFromDate((java.util.Date) value);
         }
+
+        if (!(value instanceof String)) {
+            value = ((BasePrimitive) value).getValue();
+        }
+
         patientElement.addRow(
                 this.generateRow(PDOModel.PDO_PARAM, (String) value,
                     genParamStr(PDOModel.PDO_COLUMN, columnName),
@@ -73,7 +85,6 @@ public class PatientToI2B2 extends FHIRToPDO {
         patientSet.setTypePDOSet(ElementSet.PDO_PATIENT_SET);
         Element patientElement = new Element();
         patientElement.setTypePDO(Element.PDO_PATIENT);
-
         String pdoPatientId = this.generateRow(PDOModel.PDO_PATIENT_ID, this.patientIde,
                 genParamStr(PDOModel.PDO_SOURCE, this.patientIdeSource));
         patientElement.addRow(pdoPatientId);
@@ -101,9 +112,17 @@ public class PatientToI2B2 extends FHIRToPDO {
 //        addColumnParam(patientElement, PDOModel.PDO_DEATH_DATE, "date", patient.dece);
         System.out.println("patient.getDeceased()" + patient.getDeceased());
 
+
         //TODO: check if sex must be encoded as M | F in I2B2
-        addColumnParam(patientElement, PDOModel.PDO_GENDER, "string", patient.getGender());
-        addColumnParam(patientElement, PDOModel.PDO_LANGUAGE, "string", patient.getLanguage().getValue());
+        String gender = patient.getGender();
+        if (gender != null) {
+            addColumnParam(patientElement, PDOModel.PDO_GENDER, "string", ("" + patient.getGender().charAt(0)).toUpperCase());
+        }
+
+        addColumnParam(patientElement, PDOModel.PDO_LANGUAGE, "string", patient.getLanguage());
+        if (org != null)
+            addColumnParam(patientElement, PDOModel.PDO_SOURCESYSTEM_CD, "string", org.getDisplay());
+
 
 
         ResourceMetadataMap meta = patient.getResourceMetadata();

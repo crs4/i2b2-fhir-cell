@@ -33,7 +33,8 @@ public class PDOModel {
     public static final String PDO_DEATH_DATE =         "death_date";
     public static final String PDO_UPDATE_DATE =        "update_date";
     public static final String PDO_GENDER =             "sex_cd";
-    public static final String PDO_LANGUAGE =             "language_cd";
+    public static final String PDO_LANGUAGE =           "language_cd";
+    public static final String PDO_SOURCESYSTEM_CD =    "sourcesystem_cd";
 
     private static String PDO_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<repository:patient_data\n" +
