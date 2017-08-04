@@ -61,7 +61,7 @@ public class ObservationToI2B2 extends FHIRToPDO {
             pdo.addElementSet(observationSet);
 
             // We add metadata for admin purposes
-            addMetadataInObservationSet("Observation", METADATA_CONCEPT_CD, observationSet);
+//            addMetadataInObservationSet("Observation", METADATA_CONCEPT_CD, observationSet);
         }
         return pdo.generatePDOXML();
     }
