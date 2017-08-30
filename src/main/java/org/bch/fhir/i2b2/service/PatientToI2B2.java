@@ -1,12 +1,16 @@
 package org.bch.fhir.i2b2.service;
 
 import ca.uhn.fhir.model.api.BasePrimitive;
+import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu2.composite.AddressDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -104,13 +108,30 @@ public class PatientToI2B2 extends FHIRToPDO {
             addColumnParam(patientElement, PDOModel.PDO_COLUMN_STATE_PATH, "string", state);
             isInfoPresent = true;
         }
-//        if (!isInfoPresent) return null;
 
-        addColumnParam(patientElement, PDOModel.PDO_BIRTH_DATE, "date", patient.getBirthDate());
 
-        //TODO: check why patient.getDeceased() is null
-//        addColumnParam(patientElement, PDOModel.PDO_DEATH_DATE, "date", patient.dece);
-        System.out.println("patient.getDeceased()" + patient.getDeceased());
+        String vitalStatusCDDeath = "";
+        String vitalStatusCDBirth = "";
+
+        Date birthDate = patient.getBirthDate();
+        if (birthDate != null) {
+            addColumnParam(patientElement, PDOModel.PDO_BIRTH_DATE, "date", patient.getBirthDate());
+            vitalStatusCDBirth = getPrecisionCode(new DateTimeDt(birthDate), "birth");
+        }
+
+        IDatatype deceased = patient.getDeceased();
+        System.out.println("patient.getDeceased()" + deceased);
+        if (deceased != null) {
+            if (deceased instanceof BooleanDt) {
+                vitalStatusCDDeath = ((BooleanDt) deceased).getValue() ? "Z": "N";
+            }
+            else {
+                vitalStatusCDDeath = getPrecisionCode((DateTimeDt) deceased, "death");
+                addColumnParam(patientElement, PDOModel.PDO_DEATH_DATE, "date", (((DateTimeDt) deceased).getValue()));
+            }
+        }
+
+        addColumnParam(patientElement, PDOModel.PDO_VITAL_STATUS_CD, "string", vitalStatusCDDeath + vitalStatusCDBirth);
 
 
         //TODO: check if sex must be encoded as M | F in I2B2
@@ -124,6 +145,7 @@ public class PatientToI2B2 extends FHIRToPDO {
             addColumnParam(patientElement, PDOModel.PDO_SOURCESYSTEM_CD, "string", org.getDisplay());
 
 
+//        boolean deceasedBoolean = patient.getDeceased();
 
         ResourceMetadataMap meta = patient.getResourceMetadata();
 
@@ -156,6 +178,31 @@ public class PatientToI2B2 extends FHIRToPDO {
 
         patientSet.addElement(patientElement);
         return patientSet;
+    }
+
+
+    private String getPrecisionCode (DateTimeDt dateTimeDt, String type) {
+        String result = "";
+        TemporalPrecisionEnum precisionEnum = dateTimeDt.getPrecision();
+        switch (precisionEnum) {
+            case DAY:
+                result = type.equals("death") ? "Y" : "D";
+                break;
+            case MONTH:
+                result = type.equals("death") ? "M" : "B";
+                break;
+            case YEAR:
+                result = type.equals("death") ? "X" : "F";
+                break;
+            case SECOND:
+                result= type.equals("death") ? "S" : "C";
+                break;
+            case MILLI:
+                result = type.equals("death") ? "S" : "C";
+                break;
+
+        }
+        return result;
     }
 
     private String getTimeStampStringFromDate(java.util.Date date) {

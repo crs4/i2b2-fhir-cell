@@ -35,6 +35,8 @@ public class PDOModel {
     public static final String PDO_GENDER =             "sex_cd";
     public static final String PDO_LANGUAGE =           "language_cd";
     public static final String PDO_SOURCESYSTEM_CD =    "sourcesystem_cd";
+    public static final String PDO_VITAL_STATUS_CD =    "vital_status_cd";
+
 
     private static String PDO_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<repository:patient_data\n" +
