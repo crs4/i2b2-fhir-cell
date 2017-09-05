@@ -2,6 +2,7 @@ package org.bch.fhir.i2b2.iresource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -38,11 +39,11 @@ public class PatientResourceProvider implements IResourceProvider {
     }
 
     /**
-     * The patient PUT handle
+     * The patient POST handle
      * @param patient The Patient resource
      * @return
      */
-    @Update
+    @Create()
     public MethodOutcome update(@ResourceParam Patient patient) {
         String xmlpdo = null;
         try {
