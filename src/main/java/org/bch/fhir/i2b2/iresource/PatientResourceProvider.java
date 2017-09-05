@@ -44,7 +44,7 @@ public class PatientResourceProvider implements IResourceProvider {
      * @return
      */
     @Create()
-    public MethodOutcome update(@ResourceParam Patient patient) {
+    public MethodOutcome create(@ResourceParam Patient patient) {
         String xmlpdo = null;
         try {
             xmlpdo = mapper.getPDOXML(patient);
