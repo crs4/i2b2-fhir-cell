@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bch.fhir.i2b2.config.AppConfig;
@@ -169,6 +170,10 @@ public class ObservationToI2B2 extends FHIRToPDO {
         pdoConceptCd = generateRow(PDOModel.PDO_CONCEPT_CD, conceptCd);
         out.addRow(pdoConceptCd);
 
+        List<ResourceReferenceDt> performerList = obs.getPerformer();
+        if (!performerList.isEmpty()) {
+            out.addRow(generateRow(PDOModel.PDO_PROVIDER_ID, performerList.get(0).getReference().getIdPart()));
+        }
         observationSet.addElement(out);
         return observationSet;
 
