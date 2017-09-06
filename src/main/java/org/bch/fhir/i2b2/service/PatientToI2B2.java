@@ -145,9 +145,9 @@ public class PatientToI2B2 extends FHIRToPDO {
             addColumnParam(patientElement, PDOModel.PDO_GENDER, "string", ("" + patient.getGender().charAt(0)).toUpperCase());
         }
 
-        CodeableConceptDt lang = patient.getCommunication().get(0).getLanguage();
-        if (lang != null && !lang.isEmpty())
-            addColumnParam(patientElement, PDOModel.PDO_LANGUAGE, "string", lang.getText());
+        List<Patient.Communication> communication = patient.getCommunication();
+        if (communication!= null && !communication.isEmpty())
+            addColumnParam(patientElement, PDOModel.PDO_LANGUAGE, "string", communication.get(0).getLanguage().getText());
 
         if (!org.isEmpty())
             addColumnParam(patientElement, PDOModel.PDO_SOURCESYSTEM_CD, "string", org.getDisplay());
