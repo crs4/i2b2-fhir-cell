@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu2.composite.AddressDt;
 import ca.uhn.fhir.model.dstu2.composite.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -105,12 +106,15 @@ public class PatientToI2B2 extends FHIRToPDO {
 
         String zip = addressInfo.get("zip");
         String state = addressInfo.get("state");
+        String city = addressInfo.get("city");
 
         if (zip != null) {
             addColumnParam(patientElement, PDOModel.PDO_COLUMN_ZIP_CD, "string", zip);
-        }
-        if (state != null) {
-            addColumnParam(patientElement, PDOModel.PDO_COLUMN_STATE_PATH, "string", state);
+
+            if (state != null && city != null) {
+                addColumnParam(patientElement, PDOModel.PDO_COLUMN_STATE_PATH,
+                        "string", String.format("Zip codes\\%s\\%s\\%s", state, city, zip));
+                }
         }
 
         String vitalStatusCDDeath = "";
@@ -123,6 +127,7 @@ public class PatientToI2B2 extends FHIRToPDO {
         }
 
         IDatatype deceased = patient.getDeceased();
+        System.out.println("deceased " + deceased);
         if (deceased != null) {
             if (deceased instanceof BooleanDt) {
                 vitalStatusCDDeath = ((BooleanDt) deceased).getValue() ? "Z": "N";
@@ -140,16 +145,16 @@ public class PatientToI2B2 extends FHIRToPDO {
             addColumnParam(patientElement, PDOModel.PDO_GENDER, "string", ("" + patient.getGender().charAt(0)).toUpperCase());
         }
 
-        CodeDt lang = patient.getLanguage();
+        CodeableConceptDt lang = patient.getCommunication().get(0).getLanguage();
         if (lang != null && !lang.isEmpty())
-            addColumnParam(patientElement, PDOModel.PDO_LANGUAGE, "string", lang);
+            addColumnParam(patientElement, PDOModel.PDO_LANGUAGE, "string", lang.getText());
 
         if (!org.isEmpty())
             addColumnParam(patientElement, PDOModel.PDO_SOURCESYSTEM_CD, "string", org.getDisplay());
 
         BoundCodeableConceptDt<MaritalStatusCodesEnum> maritalStatus = patient.getMaritalStatus();
         if (!maritalStatus.isEmpty()) {
-            addColumnParam(patientElement, PDOModel.PDO_MARITAL_STATUS_CD, "string", maritalStatus.getCoding().get(0).getCode());
+            addColumnParam(patientElement, PDOModel.PDO_MARITAL_STATUS_CD, "string", maritalStatus.getText());
         }
 
 
@@ -229,13 +234,15 @@ public class PatientToI2B2 extends FHIRToPDO {
             log.warn("No address information is provided for the Patient resource");
             return res;
         }
-        AddressDt d = addrs.get(0);
-        StringDt zip = d.getPostalCodeElement();
+        AddressDt addressDt = addrs.get(0);
+        StringDt zip = addressDt.getPostalCodeElement();
+        StringDt city = addressDt.getCityElement();
+
         if (!zip.isEmpty())
-            res.put("zip", zip.getValue());
-        StringDt state = d.getStateElement();
-        if (!state.isEmpty())
-            res.put("state", state.getValue());
+            res.put("zip", zip.isEmpty()? null: zip.getValue());
+        StringDt state = addressDt.getStateElement();
+        res.put("state", state.isEmpty()? null: state.getValue());
+        res.put("city", city.isEmpty()? null: city.getValue());
 
         return res;
     }
