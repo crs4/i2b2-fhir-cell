@@ -47,6 +47,15 @@ public class ObservationToI2B2 extends FHIRToPDO {
         Observation obs = (Observation) resource;
         PDOModel pdo = new PDOModel();
         if (obs!=null) {
+            String uri = obs.getSubject().getReference().getBaseUrl();
+            System.out.println("uri " + uri);
+            if (uri != null) {
+                this.patientIdeSource = uri;
+            }
+            else {
+                this.patientIdeSource = "@";
+            }
+
             this.patientIde = this.getPatientId(obs);
             Encounter enc = findEncounter(obs);
             this.eventIde = this.getEventId(enc);
@@ -60,6 +69,8 @@ public class ObservationToI2B2 extends FHIRToPDO {
             pdo.addElementSet(eventSet);
             pdo.addElementSet(patientSet);
             pdo.addElementSet(observationSet);
+
+
 
             // We add metadata for admin purposes
 //            addMetadataInObservationSet("Observation", METADATA_CONCEPT_CD, observationSet);
