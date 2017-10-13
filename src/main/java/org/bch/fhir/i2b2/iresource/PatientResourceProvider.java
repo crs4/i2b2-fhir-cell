@@ -15,13 +15,14 @@ import org.bch.fhir.i2b2.external.I2B2CellFR;
 import org.bch.fhir.i2b2.service.FHIRToPDO;
 import org.bch.fhir.i2b2.service.PatientToI2B2;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
  * The Patient resource provider class
  * @author CHIP-IHL
  */
-public class PatientResourceProvider implements IResourceProvider {
+public class PatientResourceProvider extends BaseResourceProvider implements IResourceProvider {
 
     protected FhirContext ctx = FhirContext.forDstu2();
     protected FHIRToPDO mapper = new PatientToI2B2();
@@ -44,8 +45,12 @@ public class PatientResourceProvider implements IResourceProvider {
      * @return
      */
     @Create()
-    public MethodOutcome create(@ResourceParam Patient patient) {
+    public MethodOutcome create(@ResourceParam Patient patient, HttpServletRequest theRequest) {
         String xmlpdo = null;
+        String [] credentials = getCredentials(theRequest);
+        String user = credentials[0];
+        String pwd = credentials[1];
+
         try {
             xmlpdo = mapper.getPDOXML(patient);
             System.out.println(xmlpdo);

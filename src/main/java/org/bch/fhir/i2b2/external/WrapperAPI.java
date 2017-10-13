@@ -1,9 +1,12 @@
 package org.bch.fhir.i2b2.external;
 
+import org.bch.fhir.i2b2.config.AppConfig;
+import org.bch.fhir.i2b2.exception.FHIRI2B2Exception;
 import org.bch.fhir.i2b2.util.HttpRequest;
 import org.bch.fhir.i2b2.util.SoapRequest;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +15,8 @@ import java.util.logging.Logger;
  * @author CHIP-IHL
  */
 public class WrapperAPI {
+    protected String user;
+    protected String pwd;
 
     @Inject
     private HttpRequest httpRequest;
@@ -56,5 +61,39 @@ public class WrapperAPI {
         this.httpRequest = httpRequest;
     }
     public void setSoapRequest(SoapRequest soapRequest) { this.soapRequest = soapRequest;}
+    public void setCredentials(String user, String pwd) {
+        this.user = user;
+        this.pwd = pwd;
+    }
+
+    public String [] getCredentials() {
+        return new String []{user, pwd};
+    }
+
+    public String getUser(){
+        return user;
+    }
+
+    public String getPwd(){
+        return pwd;
+    }
+
+    public void loadDefaultCredentials() throws FHIRI2B2Exception {
+        String credentials=null;
+        try {
+            credentials = AppConfig.getAuthCredentials(AppConfig.CREDENTIALS_FILE_I2B2);
+        } catch (IOException e) {
+            // It means the file does not exists
+        }
+
+        if (credentials!=null) {
+            String[] usrpwd = credentials.split(":");
+            user = usrpwd[0];
+            if (usrpwd.length > 1) {
+                pwd = usrpwd[1];
+            }
+        }
+    }
+
 
 }

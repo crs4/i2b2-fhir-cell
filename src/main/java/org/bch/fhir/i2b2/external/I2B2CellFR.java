@@ -48,7 +48,9 @@ public class I2B2CellFR extends WrapperAPI {
      * @throws FHIRI2B2Exception
      * @throws IOException
      */
-    public UploadI2B2Response pushPDOXML(String pdoxml) throws FHIRI2B2Exception, IOException {
+
+    public UploadI2B2Response pushPDOXML(String pdoxml)
+            throws FHIRI2B2Exception, IOException {
         this.log(Level.INFO, MODULE+OP_PUSH_PDO+"IN");
         try {
             loadTemplates();
@@ -57,6 +59,7 @@ public class I2B2CellFR extends WrapperAPI {
             throw e;
         }
         String fileName = sendFile(pdoxml);
+	    System.out.println(pdoxml);
         this.log(Level.INFO, MODULE+OP_PUSH_PDO+"File:"+fileName+ " sent to i2b2");
         UploadI2B2Response response = uploadFile(fileName);
         this.log(Level.INFO, MODULE+OP_PUSH_PDO+"File:"+fileName+ " uploaded to i2b2");
@@ -67,22 +70,6 @@ public class I2B2CellFR extends WrapperAPI {
         // Generate the file name
         String fileName = generateFileName();
 
-        // Get the credentials to access i2b2
-        String credentials=null;
-        try {
-            credentials = AppConfig.getAuthCredentials(AppConfig.CREDENTIALS_FILE_I2B2);
-        } catch (IOException e) {
-            // It means the file does not exists
-        }
-        String i2b2user="";
-        String i2b2pwd="";
-        if (credentials!=null) {
-            String[] usrpwd = credentials.split(":");
-            i2b2user = usrpwd[0];
-            if (usrpwd.length > 1) {
-                i2b2pwd = usrpwd[1];
-            }
-        }
         // Prepare date
         SimpleDateFormat dateFormatOutput = new SimpleDateFormat(AppConfig.getProp(AppConfig.FORMAT_DATE_I2B2));
         String dateTime = dateFormatOutput.format(new Date());
@@ -91,8 +78,8 @@ public class I2B2CellFR extends WrapperAPI {
         String i2b2Message = generateFileSendRequest(
                 dateTime,
                 AppConfig.getProp(AppConfig.I2B2_DOMAIN),
-                i2b2user,
-                i2b2pwd,
+                user,
+                pwd,
                 AppConfig.getProp(AppConfig.I2B2_PROJECT_ID),
                 calcFileSize(pdoxml),
                 fileName,
@@ -153,17 +140,7 @@ public class I2B2CellFR extends WrapperAPI {
 
     private UploadI2B2Response uploadFile(String fileName) throws FHIRI2B2Exception, IOException {
         this.log(Level.INFO, MODULE+OP_UP_FILE + "IN");
-        // Get credentials
-        String credentials = AppConfig.getAuthCredentials(AppConfig.CREDENTIALS_FILE_I2B2);
-        String i2b2user = "";
-        String i2b2pwd = "";
-        if (credentials != null) {
-            String[] usrpwd = credentials.split(":");
-            i2b2user = usrpwd[0];
-            if (usrpwd.length > 1) {
-                i2b2pwd = usrpwd[1];
-            }
-        }
+
 
         // Prepare date
         SimpleDateFormat dateFormatOutput = new SimpleDateFormat(AppConfig.getProp(AppConfig.FORMAT_DATE_I2B2));
@@ -180,8 +157,8 @@ public class I2B2CellFR extends WrapperAPI {
         String i2b2Message = generateFileUploadRequest(
                 dateTime,
                 AppConfig.getProp(AppConfig.I2B2_DOMAIN),
-                i2b2user,
-                i2b2pwd,
+                user,
+                pwd,
                 AppConfig.getProp(AppConfig.I2B2_PROJECT_ID),
                 fullPath,
                 fileName);

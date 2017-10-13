@@ -13,14 +13,16 @@ import org.bch.fhir.i2b2.exception.FHIRI2B2Exception;
 import org.bch.fhir.i2b2.external.I2B2CellFR;
 import org.bch.fhir.i2b2.service.FHIRToPDO;
 import org.bch.fhir.i2b2.service.QResponseToI2B2;
+import org.bch.fhir.i2b2.util.HttpRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
  * QustionnaireResponse resource provider class
  * @author CHIP-IHL
  */
-public class QuestionnaireResponseResourceProvider implements IResourceProvider {
+public class QuestionnaireResponseResourceProvider extends BaseResourceProvider implements IResourceProvider {
     Log log = LogFactory.getLog(QuestionnaireResponseResourceProvider.class);
 
     protected FhirContext ctx = FhirContext.forDstu2();
@@ -43,12 +45,14 @@ public class QuestionnaireResponseResourceProvider implements IResourceProvider 
      * @return
      */
     @Create()
-    public MethodOutcome createQA(@ResourceParam QuestionnaireResponse theQR) {
+    public MethodOutcome createQA(@ResourceParam QuestionnaireResponse theQR, HttpServletRequest theRequest) {
         log.info("New POST QuestionnaireResponse");
 
         String xmlpdo = null;
+        String [] credentials = getCredentials(theRequest);
         try {
             xmlpdo = mapper.getPDOXML(theQR);
+            i2b2.setCredentials(credentials[0], credentials[1]);
             i2b2.pushPDOXML(xmlpdo);
         } catch (FHIRI2B2Exception e) {
             // We return 500!
