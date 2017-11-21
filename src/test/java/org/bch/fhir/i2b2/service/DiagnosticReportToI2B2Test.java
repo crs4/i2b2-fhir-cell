@@ -84,6 +84,9 @@ public class DiagnosticReportToI2B2Test {
         Node obsConceptCD = (Node) xpath.evaluate("//observation_set/observation/concept_cd", doc, XPathConstants.NODE);
         Assert.assertEquals(obsConceptCD.getTextContent(), expectedConceptCD);
 
+        String observer = "1832473e-2fe0-452d-abe9-3cdb9879522f";
+        Node observerCD = (Node) xpath.evaluate("//observation_set/observation/observer_cd", doc, XPathConstants.NODE);
+        Assert.assertEquals(observerCD.getTextContent(), observer);
 
 
     }

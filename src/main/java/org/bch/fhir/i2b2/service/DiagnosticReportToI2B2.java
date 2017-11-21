@@ -23,10 +23,12 @@ import java.util.Map;
  */
 public class DiagnosticReportToI2B2 extends FHIRToPDO {
     Log log = LogFactory.getLog(ObservationToI2B2.class);
+    private DiagnosticReport report;
+    private CodingDt codedDiagnosis;
 
     @Override
     public String getPDOXML(BaseResource resource) throws FHIRI2B2Exception {
-        DiagnosticReport report = (DiagnosticReport) resource;
+        this.report = (DiagnosticReport) resource;
         PDOModel pdo = new PDOModel();
 
         if (report != null) {
@@ -40,30 +42,30 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
             }
 
         }
-        CodingDt codedDiagnosis = report.getCodedDiagnosis().get(0).getCoding().get(0);
-        this.patientIde = this.getPatientId(report);
+        this.codedDiagnosis = this.report.getCodedDiagnosis().get(0).getCoding().get(0);
+        this.patientIde = this.getPatientId();
         pdo.addElementSet(generatePIDSet());
-        pdo.addElementSet(generateConceptSet(codedDiagnosis));
-        pdo.addElementSet(generateObservationSet(codedDiagnosis));
+
+        pdo.addElementSet(generateConceptSet());
+        pdo.addElementSet(generateObservationSet());
+
+        System.out.println("performer " + report.getPerformer().getReference().getIdPart());
+
         return pdo.generatePDOXML();
     }
 
-    private String getPatientId(DiagnosticReport report) throws FHIRI2B2Exception {
+    private String getPatientId() throws FHIRI2B2Exception {
         ResourceReferenceDt refPatient = report.getSubject();
         if (refPatient.isEmpty()) throw new FHIRI2B2Exception("Subject reference is not informed");
         String idPat = refPatient.getReference().getIdPart();
         return idPat;
     }
 
-    protected ElementSet generateConceptSet(CodingDt codedDiagnosis) throws FHIRI2B2Exception {
+    protected ElementSet generateConceptSet() throws FHIRI2B2Exception {
         ElementSet conceptSet = new ElementSet();
         conceptSet.setTypePDOSet(ElementSet.PDO_CONCEPT_SET);
         Element concept = new Element();
         concept.setTypePDO(Element.PDO_CONCEPT);
-
-//        <concept_path>Diagnoses\athm\C0004096\</concept_path>
-//        <concept_cd>UMLS:C0004096</concept_cd>
-//        <name_char>Asthma</name_char>
 
         String conceptCd = this.generateRow(PDOModel.PDO_CONCEPT_CD, "/Diagnoses/" + codedDiagnosis.getCode());
         String nameChar = this.generateRow(PDOModel.PDO_NAME_CHAR, codedDiagnosis.getDisplay());
@@ -79,7 +81,7 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         );
     }
 
-    private ElementSet generateObservationSet(CodingDt codedDiagnosis) throws FHIRI2B2Exception {
+    private ElementSet generateObservationSet() throws FHIRI2B2Exception {
         ElementSet observationSet = new ElementSet();
         observationSet.setTypePDOSet(ElementSet.PDO_OBSERVATION_SET);
 
@@ -88,6 +90,7 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         observationSet.addElement(observation);
         observation.addRow(generatePatientID());
         observation.addRow(this.generateRow(PDOModel.PDO_CONCEPT_CD, codedDiagnosis.getCode()));
+        observation.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, report.getPerformer().getReference().getIdPart()));
 
         return observationSet;
 
