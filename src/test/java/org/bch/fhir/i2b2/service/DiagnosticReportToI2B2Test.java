@@ -21,6 +21,9 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /**
  * Created by mauro on 20/11/17.
  */
@@ -55,38 +58,57 @@ public class DiagnosticReportToI2B2Test {
         Document doc = parseXMLString(xml);
         XPath xpath = XPathFactory.newInstance().newXPath();
 
-        Node patientSetPatientID = (Node) xpath.evaluate("//pid_set/pid/patient_id", doc, XPathConstants.NODE);
+        Node patientSetPatientID = (Node) xpath.evaluate("/patient_data/pid_set/pid/patient_id", doc, XPathConstants.NODE);
         String patientID = patientSetPatientID.getTextContent();
-        Assert.assertEquals(patientID, "SNNSNN56M25B354O");
+        assertEquals(patientID, "SNNSNN56M25B354O");
 
-        Assert.assertEquals(
-                doc.getElementsByTagName("patient_id").item(0).getAttributes().getNamedItem("source").getNodeValue(),
+        assertEquals(
+                patientSetPatientID.getAttributes().getNamedItem("source").getNodeValue(),
                 source
         );
-        String expectedConceptCD = "188340000";
-        String conceptCD = doc.getElementsByTagName("concept_cd").item(0).getTextContent();
-        Assert.assertEquals(conceptCD, "/Diagnoses/" + expectedConceptCD);
 
-        String nameChar = doc.getElementsByTagName("name_char").item(0).getTextContent();
-        Assert.assertEquals(nameChar, "Malignant tumor of craniopharyngeal duct");
-
+        Node conceptCD = (Node) xpath.evaluate("/patient_data/concept_set/concept/concept_cd[text()='/Diagnoses/188340000']", doc, XPathConstants.NODE);
+        assertNotNull(conceptCD);
+        Node  nameChar = (Node) xpath.evaluate("/patient_data/concept_set/concept/name_char[../concept_cd/text()='/Diagnoses/188340000']", doc, XPathConstants.NODE);
+        assertNotNull(nameChar);
+        assertEquals("Malignant tumor of craniopharyngeal duct", nameChar.getTextContent());
 
         Assert.assertTrue(doc.getElementsByTagName("observation_set").getLength() == 1);
         NodeList observationList = doc.getElementsByTagName("observation");
-        Assert.assertTrue(observationList.getLength() == 1);
+        Assert.assertTrue(observationList.getLength() == 2);
 
-        NodeList patientList = (NodeList) xpath.evaluate("//observation_set/observation/patient_id", doc, XPathConstants.NODESET);
-        Assert.assertTrue(patientList.getLength() == 1);
+        Node observationDiagnosisPatientID1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/patient_id", doc, XPathConstants.NODE);
+        assertNotNull(observationDiagnosisPatientID1);
 
-        Node patient = patientList.item(0);
-        Assert.assertEquals(patient.getAttributes().getNamedItem("source").getNodeValue(), source);
+        assertEquals(observationDiagnosisPatientID1.getAttributes().getNamedItem("source").getNodeValue(), source);
+        assertEquals(observationDiagnosisPatientID1.getTextContent(), "SNNSNN56M25B354O");
 
-        Node obsConceptCD = (Node) xpath.evaluate("//observation_set/observation/concept_cd", doc, XPathConstants.NODE);
-        Assert.assertEquals(obsConceptCD.getTextContent(), expectedConceptCD);
+        Node observationDiagnosisPatientID2 = (Node) xpath.evaluate("/patient_data/observation_set/*[2]/patient_id", doc, XPathConstants.NODE);
+        assertNotNull(observationDiagnosisPatientID2);
 
-        String observer = "1832473e-2fe0-452d-abe9-3cdb9879522f";
-        Node observerCD = (Node) xpath.evaluate("//observation_set/observation/observer_cd", doc, XPathConstants.NODE);
-        Assert.assertEquals(observerCD.getTextContent(), observer);
+        assertEquals(observationDiagnosisPatientID2.getAttributes().getNamedItem("source").getNodeValue(), source);
+        assertEquals(observationDiagnosisPatientID2.getTextContent(), "SNNSNN56M25B354O");
+
+
+        Node observationDiagnosisConceptCD1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/concept_cd", doc, XPathConstants.NODE);
+        assertNotNull(observationDiagnosisConceptCD1);
+
+        assertEquals(observationDiagnosisConceptCD1.getTextContent(), "188340000");
+
+        Node observationDiagnosisConceptCD2 = (Node) xpath.evaluate("/patient_data/observation_set/*[2]/concept_cd", doc, XPathConstants.NODE);
+        assertNotNull(observationDiagnosisConceptCD2);
+
+        assertEquals(observationDiagnosisConceptCD2.getTextContent(), "Haemoglobin");
+
+
+        Node observationDiagnosisObserverCD1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/observer_cd", doc, XPathConstants.NODE);
+        assertNotNull(observationDiagnosisObserverCD1);
+        assertEquals(observationDiagnosisObserverCD1.getTextContent(), "1832473e-2fe0-452d-abe9-3cdb9879522f");
+
+        Node observationDiagnosisObserverCD2 = (Node) xpath.evaluate("/patient_data/observation_set/*[2]/observer_cd", doc, XPathConstants.NODE);
+        assertNotNull(observationDiagnosisObserverCD2);
+        assertEquals(observationDiagnosisObserverCD2.getTextContent(), "1832473e-2fe0-452d-abe9-3cdb9879522f");
+
 
 
     }

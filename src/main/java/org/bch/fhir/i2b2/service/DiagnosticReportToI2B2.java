@@ -1,5 +1,6 @@
 package org.bch.fhir.i2b2.service;
 
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
@@ -92,6 +93,22 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         observation.addRow(this.generateRow(PDOModel.PDO_CONCEPT_CD, codedDiagnosis.getCode()));
         observation.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, report.getPerformer().getReference().getIdPart()));
 
+        for (IResource obs : this.report.getContained().getContainedResources()){
+            System.out.println("obs "+ obs);
+            Element observationContained = new Element();
+            observationContained.setTypePDO(Element.PDO_OBSERVATION);
+            observationContained.addRow(generatePatientID());
+            observationContained.addRow(
+                    this.generateRow(PDOModel.PDO_CONCEPT_CD, ((Observation) obs).getCode().getText())
+            );
+            observationContained.addRow(
+                    this.generateRow(PDOModel.PDO_OBSERVER_CD, ((Observation) obs).getPerformer().get(0).getReference().getIdPart())
+            );
+            observationSet.addElement(observationContained);
+
+
+
+        }
         return observationSet;
 
     }

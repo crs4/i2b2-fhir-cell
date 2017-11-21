@@ -58,5 +58,53 @@
         }
       ]
     }
+  ],
+  "contained": [
+    {
+      "resourceType": "Observation",
+      "id": "r1",
+      "status": "final",
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "718-7",
+            "display": "Hemoglobin [Mass/volume] in Blood"
+          }
+        ],
+        "text": "Haemoglobin"
+      },
+      "subject": {
+        "reference": "Patient/pat2"
+      },
+      "performer": [
+        {
+          "reference": "Organization/1832473e-2fe0-452d-abe9-3cdb9879522f",
+          "display": "Acme Laboratory, Inc"
+        }
+      ],
+      "valueQuantity": {
+        "value": 176,
+        "unit": "g/L",
+        "system": "http://unitsofmeasure.org",
+        "code": "g/L"
+      },
+      "referenceRange": [
+        {
+          "low": {
+            "value": 135,
+            "unit": "g/L",
+            "system": "http://unitsofmeasure.org",
+            "code": "g/L"
+          },
+          "high": {
+            "value": 180,
+            "unit": "g/L",
+            "system": "http://unitsofmeasure.org",
+            "code": "g/L"
+          }
+        }
+      ]
+    }
   ]
 }
