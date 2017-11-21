@@ -50,5 +50,15 @@
       }
     }
   ],
-  "conclusion": "Unremarkable study"
+  "codedDiagnosis": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "188340000",
+          "display": "Malignant tumor of craniopharyngeal duct"
+        }
+      ]
+    }
+  ]
 }

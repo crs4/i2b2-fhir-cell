@@ -1,5 +1,6 @@
 package org.bch.fhir.i2b2.service;
 
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
@@ -35,6 +36,7 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         }
         this.patientIde = this.getPatientId(report);
         pdo.addElementSet(generatePIDSet());
+        pdo.addElementSet(generateConceptSet(report));
         return pdo.generatePDOXML();
     }
 
@@ -43,6 +45,24 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         if (refPatient.isEmpty()) throw new FHIRI2B2Exception("Subject reference is not informed");
         String idPat = refPatient.getReference().getIdPart();
         return idPat;
+    }
+
+    protected ElementSet generateConceptSet(DiagnosticReport report) throws FHIRI2B2Exception {
+        ElementSet conceptSet = new ElementSet();
+        conceptSet.setTypePDOSet(ElementSet.PDO_CONCEPT_SET);
+        Element concept = new Element();
+        concept.setTypePDO(Element.PDO_CONCEPT);
+
+//        <concept_path>Diagnoses\athm\C0004096\</concept_path>
+//        <concept_cd>UMLS:C0004096</concept_cd>
+//        <name_char>Asthma</name_char>
+        CodingDt codedDiagnosis = report.getCodedDiagnosis().get(0).getCoding().get(0);
+        String conceptCd = this.generateRow(PDOModel.PDO_CONCEPT_CD, codedDiagnosis.getCode());
+        String nameChar = this.generateRow(PDOModel.PDO_NAME_CHAR, codedDiagnosis.getDisplay());
+        concept.addRow(conceptCd);
+        concept.addRow(nameChar);
+        conceptSet.addElement(concept);
+        return conceptSet;
     }
 
 }

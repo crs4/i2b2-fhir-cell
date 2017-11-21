@@ -15,6 +15,7 @@ public class Element {
     public static String PDO_EID = "eid";
     public static String PDO_EVENT = "event";
     public static String PDO_OBSERVATION = "observation";
+    public static String PDO_CONCEPT = "concept";
 
     private String typePDO = null;
     private List<String> rows = new ArrayList<>();

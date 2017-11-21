@@ -15,6 +15,7 @@ public class ElementSet {
     public static String PDO_EID_SET = "eid_set";
     public static String PDO_EVENT_SET = "event_set";
     public static String PDO_OBSERVATION_SET = "observation_set";
+    public static String PDO_CONCEPT_SET = "concept_set";
 
     private String typePDOSet=null;
     private List<Element> elements = new ArrayList<>();
