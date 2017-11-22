@@ -6,6 +6,7 @@ import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bch.fhir.i2b2.config.AppConfig;
@@ -15,6 +16,7 @@ import org.bch.fhir.i2b2.pdomodel.ElementSet;
 import org.bch.fhir.i2b2.pdomodel.PDOModel;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,7 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
 
         pdo.addElementSet(generateConceptSet());
         pdo.addElementSet(generateObservationSet());
+        pdo.addElementSet(generateObserverSet());
 
         System.out.println("performer " + report.getPerformer().getReference().getIdPart());
 
@@ -110,6 +113,27 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
 
         }
         return observationSet;
+
+    }
+
+    private ElementSet generateObserverSet() throws FHIRI2B2Exception {
+        ElementSet observerSet = new ElementSet();
+        observerSet.setTypePDOSet(ElementSet.PDO_OBSERVER_SET);
+
+        Element observer = new Element();
+        observer.setTypePDO(Element.PDO_OBSERVER);
+
+        String [] observerPathArray = report.getPerformer().getReference().getValue().split("/");
+        String observerPath = StringUtils.join(
+                Arrays.copyOfRange(observerPathArray, 1, observerPathArray.length - 1), "\\"
+        );
+
+
+        observer.addRow(this.generateRow(PDOModel.PDO_OBSERVER_PATH, observerPath));
+        observer.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, report.getPerformer().getReference().getIdPart()));
+        observerSet.addElement(observer);
+//        observer from contained observation
+        return observerSet;
 
     }
 

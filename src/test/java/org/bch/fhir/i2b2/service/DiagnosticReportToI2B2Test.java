@@ -103,13 +103,25 @@ public class DiagnosticReportToI2B2Test {
 
         Node observationDiagnosisObserverCD1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/observer_cd", doc, XPathConstants.NODE);
         assertNotNull(observationDiagnosisObserverCD1);
-        assertEquals(observationDiagnosisObserverCD1.getTextContent(), "1832473e-2fe0-452d-abe9-3cdb9879522f");
+        assertEquals(observationDiagnosisObserverCD1.getTextContent(), "I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO");
 
         Node observationDiagnosisObserverCD2 = (Node) xpath.evaluate("/patient_data/observation_set/*[2]/observer_cd", doc, XPathConstants.NODE);
         assertNotNull(observationDiagnosisObserverCD2);
         assertEquals(observationDiagnosisObserverCD2.getTextContent(), "1832473e-2fe0-452d-abe9-3cdb9879522f");
 
+        Node observerDiagnosisPath = (Node) xpath.evaluate(
+                "/patient_data/observer_set/*[1]/observer_path[text()='Friuli Venezia Giulia']",
+                doc,
+                XPathConstants.NODE
+        );
+        assertNotNull(observerDiagnosisPath);
 
+        Node observerDiagnosisCD = (Node) xpath.evaluate(
+                "/patient_data/observer_set/*[1]/observer_cd[text()='I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO']",
+                doc,
+                XPathConstants.NODE
+        );
+        assertNotNull(observerDiagnosisCD);
 
     }
 

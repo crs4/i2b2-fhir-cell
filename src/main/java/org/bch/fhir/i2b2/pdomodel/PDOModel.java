@@ -40,6 +40,7 @@ public class PDOModel {
     public static final String PDO_PROVIDER_ID =        "observer_cd";
     public static final String PDO_CONCEPT_PATH =        "concept_path";
     public static final String PDO_NAME_CHAR =        "name_char";
+    public static final String PDO_OBSERVER_PATH =        "observer_path";
 
 
     private static String PDO_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +

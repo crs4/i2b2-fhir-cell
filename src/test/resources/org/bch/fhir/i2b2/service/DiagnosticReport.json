@@ -35,8 +35,8 @@
   "effectiveDateTime": "2012-12-01T12:00:00+01:00",
   "issued": "2012-12-01T12:00:00+01:00",
   "performer": [{
-      "reference": "Organization/1832473e-2fe0-452d-abe9-3cdb9879522f",
-      "display": "Acme Laboratory, Inc"
+      "reference": "Organization/Friuli Venezia Giulia/I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO",
+      "display": "I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO"
     }
   ],
   "image": [
