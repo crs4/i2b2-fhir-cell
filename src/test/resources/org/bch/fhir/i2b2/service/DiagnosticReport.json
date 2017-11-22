@@ -64,6 +64,7 @@
       "resourceType": "Observation",
       "id": "r1",
       "status": "final",
+      "effectiveDateTime": "2012-12-01T13:00:00+01:00",
       "code": {
         "coding": [
           {

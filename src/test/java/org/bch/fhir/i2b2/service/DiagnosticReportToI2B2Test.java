@@ -98,7 +98,7 @@ public class DiagnosticReportToI2B2Test {
         assertNotNull(observationDiagnosisStartDate1);
 
         Node observationDiagnosisEndDate1 = (Node) xpath.evaluate(
-                "/patient_data/observation_set/*[1]/start_date[text()='2012-12-01T11:00:00.00']", doc, XPathConstants.NODE);
+                "/patient_data/observation_set/*[1]/end_date[text()='2012-12-01T11:00:00.00']", doc, XPathConstants.NODE);
         assertNotNull(observationDiagnosisEndDate1);
 
 
@@ -108,6 +108,15 @@ public class DiagnosticReportToI2B2Test {
         assertNotNull(observationDiagnosisConceptCD2);
 
         assertEquals(observationDiagnosisConceptCD2.getTextContent(), "Haemoglobin");
+
+        Node observationStartDate2 = (Node) xpath.evaluate(
+                "/patient_data/observation_set/*[2]/start_date[text()='2012-12-01T12:00:00.00']", doc, XPathConstants.NODE);
+        assertNotNull(observationStartDate2);
+
+        Node observationEndDate2 = (Node) xpath.evaluate(
+                "/patient_data/observation_set/*[2]/end_date[text()='2012-12-01T12:00:00.00']", doc, XPathConstants.NODE);
+        assertNotNull(observationEndDate2);
+
 
 
         Node observationDiagnosisObserverCD1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/observer_cd", doc, XPathConstants.NODE);

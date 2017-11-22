@@ -84,6 +84,16 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         );
     }
 
+    private void addDate(Element element, DateTimeDt datetime) throws FHIRI2B2Exception {
+        if (datetime != null) {
+            String outputDataFormat = AppConfig.getProp(AppConfig.FORMAT_DATE_I2B2);
+            SimpleDateFormat dateFormatOutput = new SimpleDateFormat(outputDataFormat);
+            String startDateStr = dateFormatOutput.format( datetime.getValue());
+            element.addRow(this.generateRow(PDOModel.PDO_START_DATE, startDateStr));
+            element.addRow(this.generateRow(PDOModel.PDO_END_DATE, startDateStr));
+        }
+    }
+
     private ElementSet generateObservationSet() throws FHIRI2B2Exception {
         ElementSet observationSet = new ElementSet();
         observationSet.setTypePDOSet(ElementSet.PDO_OBSERVATION_SET);
@@ -95,26 +105,17 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         observation.addRow(this.generateRow(PDOModel.PDO_CONCEPT_CD, codedDiagnosis.getCode()));
         observation.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, report.getPerformer().getReference().getIdPart()));
 
-        String outputDataFormat = AppConfig.getProp(AppConfig.FORMAT_DATE_I2B2);
-        SimpleDateFormat dateFormatOutput = new SimpleDateFormat(outputDataFormat);
+        addDate(observation, (DateTimeDt)report.getEffective());
 
-        String startDateStr = dateFormatOutput.format(((DateTimeDt)report.getEffective()).getValue());
-        observation.addRow(this.generateRow(PDOModel.PDO_START_DATE, startDateStr));
-        observation.addRow(this.generateRow(PDOModel.PDO_END_DATE, startDateStr));
-
-        for (IResource obs : this.report.getContained().getContainedResources()){
+        for (IResource ir : this.report.getContained().getContainedResources()){
+            Observation obs = (Observation) ir;
             Element observationContained = new Element();
             observationContained.setTypePDO(Element.PDO_OBSERVATION);
             observationContained.addRow(generatePatientID());
-            observationContained.addRow(
-                    this.generateRow(PDOModel.PDO_CONCEPT_CD, ((Observation) obs).getCode().getText())
-            );
-            observationContained.addRow(
-                    this.generateRow(PDOModel.PDO_OBSERVER_CD, ((Observation) obs).getPerformer().get(0).getReference().getIdPart())
-            );
+            observationContained.addRow( this.generateRow(PDOModel.PDO_CONCEPT_CD, obs.getCode().getText()));
+            observationContained.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, obs.getPerformer().get(0).getReference().getIdPart()));
             observationSet.addElement(observationContained);
-
-
+            addDate(observationContained, (DateTimeDt)obs.getEffective());
 
         }
         return observationSet;
