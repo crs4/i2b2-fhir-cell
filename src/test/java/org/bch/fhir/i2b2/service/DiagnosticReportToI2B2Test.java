@@ -109,19 +109,39 @@ public class DiagnosticReportToI2B2Test {
         assertNotNull(observationDiagnosisObserverCD2);
         assertEquals(observationDiagnosisObserverCD2.getTextContent(), "1832473e-2fe0-452d-abe9-3cdb9879522f");
 
-        Node observerDiagnosisPath = (Node) xpath.evaluate(
+        NodeList observers = (NodeList) xpath.evaluate("/patient_data/observer_set/observer", doc, XPathConstants.NODESET);
+        assertEquals(2, observers.getLength());
+
+
+        Node observerDiagnosisPath1 = (Node) xpath.evaluate(
                 "/patient_data/observer_set/*[1]/observer_path[text()='Friuli Venezia Giulia']",
                 doc,
                 XPathConstants.NODE
         );
-        assertNotNull(observerDiagnosisPath);
+        assertNotNull(observerDiagnosisPath1);
 
-        Node observerDiagnosisCD = (Node) xpath.evaluate(
+        Node observerDiagnosisCD1 = (Node) xpath.evaluate(
                 "/patient_data/observer_set/*[1]/observer_cd[text()='I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO']",
                 doc,
                 XPathConstants.NODE
         );
-        assertNotNull(observerDiagnosisCD);
+        assertNotNull(observerDiagnosisCD1);
+
+        Node observerDiagnosisPath2 = (Node) xpath.evaluate(
+                "/patient_data/observer_set/*[2]/observer_path[text()='Acme\\test']",
+                doc,
+                XPathConstants.NODE
+        );
+        assertNotNull(observerDiagnosisPath2);
+
+        Node observerDiagnosisCD2 = (Node) xpath.evaluate(
+                "/patient_data/observer_set/*[2]/observer_cd[text()='1832473e-2fe0-452d-abe9-3cdb9879522f']",
+                doc,
+                XPathConstants.NODE
+        );
+        assertNotNull(observerDiagnosisCD2);
+
+
 
     }
 

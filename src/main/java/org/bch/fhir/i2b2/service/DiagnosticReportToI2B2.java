@@ -16,10 +16,7 @@ import org.bch.fhir.i2b2.pdomodel.ElementSet;
 import org.bch.fhir.i2b2.pdomodel.PDOModel;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by mauro on 20/11/17.
@@ -97,7 +94,6 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         observation.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, report.getPerformer().getReference().getIdPart()));
 
         for (IResource obs : this.report.getContained().getContainedResources()){
-            System.out.println("obs "+ obs);
             Element observationContained = new Element();
             observationContained.setTypePDO(Element.PDO_OBSERVATION);
             observationContained.addRow(generatePatientID());
@@ -120,19 +116,29 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         ElementSet observerSet = new ElementSet();
         observerSet.setTypePDOSet(ElementSet.PDO_OBSERVER_SET);
 
-        Element observer = new Element();
-        observer.setTypePDO(Element.PDO_OBSERVER);
-
-        String [] observerPathArray = report.getPerformer().getReference().getValue().split("/");
-        String observerPath = StringUtils.join(
-                Arrays.copyOfRange(observerPathArray, 1, observerPathArray.length - 1), "\\"
-        );
 
 
-        observer.addRow(this.generateRow(PDOModel.PDO_OBSERVER_PATH, observerPath));
-        observer.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, report.getPerformer().getReference().getIdPart()));
-        observerSet.addElement(observer);
-//        observer from contained observation
+//        observers from contained observation
+        List<ResourceReferenceDt> performersList = new ArrayList<>();
+        performersList.add(report.getPerformer());
+        for (IResource obs : this.report.getContained().getContainedResources()) {
+            performersList.addAll(((Observation) obs).getPerformer());
+        }
+
+        for (ResourceReferenceDt performer: performersList){
+            Element observer = new Element();
+            observer.setTypePDO(Element.PDO_OBSERVER);
+
+            String [] observerPathArray = performer.getReference().getValue().split("/");
+            String observerPath = StringUtils.join(
+                    Arrays.copyOfRange(observerPathArray, 1, observerPathArray.length - 1), "\\"
+            );
+
+            observer.addRow(this.generateRow(PDOModel.PDO_OBSERVER_PATH, observerPath));
+            observer.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, performer.getReference().getIdPart()));
+            observerSet.addElement(observer);
+        }
+
         return observerSet;
 
     }
