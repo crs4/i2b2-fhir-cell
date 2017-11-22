@@ -6,6 +6,8 @@ import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import org.apache.axis2.databinding.types.soapencoding.DateTime;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,6 +94,13 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         observation.addRow(generatePatientID());
         observation.addRow(this.generateRow(PDOModel.PDO_CONCEPT_CD, codedDiagnosis.getCode()));
         observation.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, report.getPerformer().getReference().getIdPart()));
+
+        String outputDataFormat = AppConfig.getProp(AppConfig.FORMAT_DATE_I2B2);
+        SimpleDateFormat dateFormatOutput = new SimpleDateFormat(outputDataFormat);
+
+        String startDateStr = dateFormatOutput.format(((DateTimeDt)report.getEffective()).getValue());
+        observation.addRow(this.generateRow(PDOModel.PDO_START_DATE, startDateStr));
+        observation.addRow(this.generateRow(PDOModel.PDO_END_DATE, startDateStr));
 
         for (IResource obs : this.report.getContained().getContainedResources()){
             Element observationContained = new Element();

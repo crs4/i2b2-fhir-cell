@@ -93,6 +93,15 @@ public class DiagnosticReportToI2B2Test {
         Node observationDiagnosisConceptCD1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/concept_cd", doc, XPathConstants.NODE);
         assertNotNull(observationDiagnosisConceptCD1);
 
+        Node observationDiagnosisStartDate1 = (Node) xpath.evaluate(
+                "/patient_data/observation_set/*[1]/start_date[text()='2012-12-01T11:00:00.00']", doc, XPathConstants.NODE);
+        assertNotNull(observationDiagnosisStartDate1);
+
+        Node observationDiagnosisEndDate1 = (Node) xpath.evaluate(
+                "/patient_data/observation_set/*[1]/start_date[text()='2012-12-01T11:00:00.00']", doc, XPathConstants.NODE);
+        assertNotNull(observationDiagnosisEndDate1);
+
+
         assertEquals(observationDiagnosisConceptCD1.getTextContent(), "188340000");
 
         Node observationDiagnosisConceptCD2 = (Node) xpath.evaluate("/patient_data/observation_set/*[2]/concept_cd", doc, XPathConstants.NODE);
@@ -140,7 +149,6 @@ public class DiagnosticReportToI2B2Test {
                 XPathConstants.NODE
         );
         assertNotNull(observerDiagnosisCD2);
-
 
 
     }
