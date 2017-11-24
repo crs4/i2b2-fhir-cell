@@ -106,6 +106,7 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         observation.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, report.getPerformer().getReference().getIdPart()));
         observation.addRow(this.generateRow(PDOModel.PDO_EVENT_ID, report.getEncounter().getReference().getIdPart()));
         observation.addRow(this.generateRow(PDOModel.PDO_MODIFIER_CD, "@"));
+        observation.addRow(this.generateRow(PDOModel.PDO_INSTANCE_NUM, "1"));
 
         addDate(observation, (DateTimeDt)report.getEffective());
 
@@ -120,6 +121,7 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
             addDate(observationContained, (DateTimeDt)obs.getEffective());
             observationContained.addRow(this.generateRow(PDOModel.PDO_EVENT_ID, report.getEncounter().getReference().getIdPart()));
             observationContained.addRow(this.generateRow(PDOModel.PDO_MODIFIER_CD, "@"));
+            observationContained.addRow(this.generateRow(PDOModel.PDO_INSTANCE_NUM, "1"));
 
         }
         return observationSet;
