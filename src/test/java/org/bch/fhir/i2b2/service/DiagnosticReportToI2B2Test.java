@@ -89,6 +89,12 @@ public class DiagnosticReportToI2B2Test {
         Node observationDiagnosisPatientID2 = (Node) xpath.evaluate("/patient_data/observation_set/*[2]/patient_id", doc, XPathConstants.NODE);
         assertNotNull(observationDiagnosisPatientID2);
 
+        Node observationModifier1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/modifier_cd[text()='@']", doc, XPathConstants.NODE);
+        assertNotNull(observationModifier1);
+
+        Node observationModifier2 = (Node) xpath.evaluate("/patient_data/observation_set/*[2]/modifier_cd[text()='@']", doc, XPathConstants.NODE);
+        assertNotNull(observationModifier2);
+
         assertEquals(observationDiagnosisPatientID2.getAttributes().getNamedItem("source").getNodeValue(), source);
         assertEquals(observationDiagnosisPatientID2.getTextContent(), "SNNSNN56M25B354O");
 
