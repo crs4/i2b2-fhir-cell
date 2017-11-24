@@ -80,6 +80,9 @@ public class DiagnosticReportToI2B2Test {
         Node observationDiagnosisPatientID1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/patient_id", doc, XPathConstants.NODE);
         assertNotNull(observationDiagnosisPatientID1);
 
+        Node observationDiagnosisEventID1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/event_id[text()='1234']", doc, XPathConstants.NODE);
+        assertNotNull(observationDiagnosisEventID1);
+
         assertEquals(observationDiagnosisPatientID1.getAttributes().getNamedItem("source").getNodeValue(), source);
         assertEquals(observationDiagnosisPatientID1.getTextContent(), "SNNSNN56M25B354O");
 
@@ -117,7 +120,8 @@ public class DiagnosticReportToI2B2Test {
                 "/patient_data/observation_set/*[2]/end_date[text()='2012-12-01T12:00:00.00']", doc, XPathConstants.NODE);
         assertNotNull(observationEndDate2);
 
-
+        Node observationDiagnosisEventID2 = (Node) xpath.evaluate("/patient_data/observation_set/*[2]/event_id[text()='1234']", doc, XPathConstants.NODE);
+        assertNotNull(observationDiagnosisEventID2);
 
         Node observationDiagnosisObserverCD1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/observer_cd", doc, XPathConstants.NODE);
         assertNotNull(observationDiagnosisObserverCD1);
@@ -162,4 +166,13 @@ public class DiagnosticReportToI2B2Test {
 
     }
 
+//    @Test
+//    public void emptyResourceTest() throws Exception {
+//        DiagnosticReport report = parseFile("DiagnosticReportEmpty.json");
+//        DiagnosticReportToI2B2 diagnosticReportToI2B2 = new DiagnosticReportToI2B2();
+//        String xml = diagnosticReportToI2B2.getPDOXML(report);
+//        String source = "http://fake_fse.it";
+//
+//        System.out.println(xml);
+//    }
 }
