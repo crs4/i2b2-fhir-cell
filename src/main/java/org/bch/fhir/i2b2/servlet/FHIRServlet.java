@@ -3,6 +3,7 @@ package org.bch.fhir.i2b2.servlet;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import org.bch.fhir.i2b2.iresource.DiagnosticReportResourceProvider;
 import org.bch.fhir.i2b2.iresource.ObservationResourceProvider;
 import org.bch.fhir.i2b2.iresource.PatientResourceProvider;
 import org.bch.fhir.i2b2.iresource.QuestionnaireResponseResourceProvider;
@@ -31,6 +32,7 @@ public class FHIRServlet extends RestfulServer {
 	    resourceProviders.add(new QuestionnaireResponseResourceProvider());
         resourceProviders.add(new ObservationResourceProvider());
         resourceProviders.add(new PatientResourceProvider());
+        resourceProviders.add(new DiagnosticReportResourceProvider());
         setResourceProviders(resourceProviders);
         setUseBrowserFriendlyContentTypes(true);
     }
