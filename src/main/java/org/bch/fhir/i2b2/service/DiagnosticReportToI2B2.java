@@ -26,137 +26,44 @@ import java.util.*;
 public class DiagnosticReportToI2B2 extends FHIRToPDO {
     Log log = LogFactory.getLog(ObservationToI2B2.class);
     private DiagnosticReport report;
-    private CodingDt codedDiagnosis;
+    private ObservationToI2B2 observationToI2B2 = new ObservationToI2B2();
 
     @Override
     public String getPDOXML(BaseResource resource) throws FHIRI2B2Exception {
         this.report = (DiagnosticReport) resource;
-        PDOModel pdo = new PDOModel();
+        Observation obs = new Observation();
 
-        if (report != null) {
-            String uri = report.getSubject().getReference().getBaseUrl();
-            System.out.println("uri " + uri);
-            if (uri != null) {
-                this.patientIdeSource = uri;
-            }
-            else {
-                this.patientIdeSource = "@";
-            }
+        obs.setEncounter(report.getEncounter());
+        obs.setSubject(report.getSubject());
+        obs.setCode(report.getCodedDiagnosis().get(0));
+        obs.setValue(report.getCodedDiagnosis().get(0).getCoding().get(0).getDisplayElement());
+        obs.setEffective(report.getEffective());
+        List<ResourceReferenceDt> performerList = new ArrayList<>();
+        performerList.add(report.getPerformer());
+        obs.setPerformer(performerList);
 
-        }
-        this.codedDiagnosis = this.report.getCodedDiagnosis().get(0).getCoding().get(0);
-        this.patientIde = this.getPatientId();
-        pdo.addElementSet(generatePIDSet());
+        PDOModel pdoModel = observationToI2B2.getPDO(obs);
 
-        pdo.addElementSet(generateConceptSet());
-        pdo.addElementSet(generateObservationSet());
-        pdo.addElementSet(generateObserverSet());
-
-        System.out.println("performer " + report.getPerformer().getReference().getIdPart());
-
-        return pdo.generatePDOXML();
-    }
-
-    private String getPatientId() throws FHIRI2B2Exception {
-        ResourceReferenceDt refPatient = report.getSubject();
-        if (refPatient.isEmpty()) throw new FHIRI2B2Exception("Subject reference is not informed");
-        String idPat = refPatient.getReference().getIdPart();
-        return idPat;
-    }
-
-    protected ElementSet generateConceptSet() throws FHIRI2B2Exception {
-        ElementSet conceptSet = new ElementSet();
-        conceptSet.setTypePDOSet(ElementSet.PDO_CONCEPT_SET);
-        Element concept = new Element();
-        concept.setTypePDO(Element.PDO_CONCEPT);
-
-        String conceptCd = this.generateRow(PDOModel.PDO_CONCEPT_CD, "/Diagnoses/" + codedDiagnosis.getCode());
-        String nameChar = this.generateRow(PDOModel.PDO_NAME_CHAR, codedDiagnosis.getDisplay());
-        concept.addRow(conceptCd);
-        concept.addRow(nameChar);
-        conceptSet.addElement(concept);
-        return conceptSet;
-    }
-
-    private String generatePatientID(){
-        return this.generateRow(
-                PDOModel.PDO_PATIENT_ID, this.patientIde, genParamStr(PDOModel.PDO_SOURCE, this.patientIdeSource)
-        );
-    }
-
-    private void addDate(Element element, DateTimeDt datetime) throws FHIRI2B2Exception {
-        if (datetime != null) {
-            String outputDataFormat = AppConfig.getProp(AppConfig.FORMAT_DATE_I2B2);
-            SimpleDateFormat dateFormatOutput = new SimpleDateFormat(outputDataFormat);
-            String startDateStr = dateFormatOutput.format( datetime.getValue());
-            element.addRow(this.generateRow(PDOModel.PDO_START_DATE, startDateStr));
-            element.addRow(this.generateRow(PDOModel.PDO_END_DATE, startDateStr));
-        }
-    }
-
-    private ElementSet generateObservationSet() throws FHIRI2B2Exception {
-        ElementSet observationSet = new ElementSet();
-        observationSet.setTypePDOSet(ElementSet.PDO_OBSERVATION_SET);
-
-        Element observation = new Element();
-        observation.setTypePDO(Element.PDO_OBSERVATION);
-        observationSet.addElement(observation);
-        observation.addRow(generatePatientID());
-        observation.addRow(this.generateRow(PDOModel.PDO_CONCEPT_CD, codedDiagnosis.getCode()));
-        observation.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, report.getPerformer().getReference().getIdPart()));
-        observation.addRow(this.generateRow(PDOModel.PDO_EVENT_ID, report.getEncounter().getReference().getIdPart()));
-        observation.addRow(this.generateRow(PDOModel.PDO_MODIFIER_CD, "@"));
-        observation.addRow(this.generateRow(PDOModel.PDO_INSTANCE_NUM, "1"));
-
-        addDate(observation, (DateTimeDt)report.getEffective());
-
+        System.out.println("this.report.getContained().getContainedResources().size() " + this.report.getContained().getContainedResources().size());
         for (IResource ir : this.report.getContained().getContainedResources()){
-            Observation obs = (Observation) ir;
-            Element observationContained = new Element();
-            observationContained.setTypePDO(Element.PDO_OBSERVATION);
-            observationContained.addRow(generatePatientID());
-            observationContained.addRow( this.generateRow(PDOModel.PDO_CONCEPT_CD, obs.getCode().getText()));
-            observationContained.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, obs.getPerformer().get(0).getReference().getIdPart()));
-            observationSet.addElement(observationContained);
-            addDate(observationContained, (DateTimeDt)obs.getEffective());
-            observationContained.addRow(this.generateRow(PDOModel.PDO_EVENT_ID, report.getEncounter().getReference().getIdPart()));
-            observationContained.addRow(this.generateRow(PDOModel.PDO_MODIFIER_CD, "@"));
-            observationContained.addRow(this.generateRow(PDOModel.PDO_INSTANCE_NUM, "1"));
+            PDOModel containedPDO = observationToI2B2.getPDO((BaseResource) ir);
 
+            String [] pdo_set_array = new String[]{
+                    ElementSet.PDO_OBSERVATION_SET,
+                    ElementSet.PDO_EVENT_SET,
+                    ElementSet.PDO_EID_SET,
+//                    ElementSet.PDO_PATIENT_SET,
+                    ElementSet.PDO_PID_SET,
+                    ElementSet.PDO_CONCEPT_SET,
+            };
+
+            for (String pdo_set: pdo_set_array) {
+                for(Element el: containedPDO.getElementSet(pdo_set).getElements()) {
+                    pdoModel.getElementSet(pdo_set).addElement(el);
+                }
+            }
         }
-        return observationSet;
 
+        return pdoModel.generatePDOXML();
     }
-
-    private ElementSet generateObserverSet() throws FHIRI2B2Exception {
-        ElementSet observerSet = new ElementSet();
-        observerSet.setTypePDOSet(ElementSet.PDO_OBSERVER_SET);
-
-
-
-//        observers from contained observation
-        List<ResourceReferenceDt> performersList = new ArrayList<>();
-        performersList.add(report.getPerformer());
-        for (IResource obs : this.report.getContained().getContainedResources()) {
-            performersList.addAll(((Observation) obs).getPerformer());
-        }
-
-        for (ResourceReferenceDt performer: performersList){
-            Element observer = new Element();
-            observer.setTypePDO(Element.PDO_OBSERVER);
-
-            String [] observerPathArray = performer.getReference().getValue().split("/");
-            String observerPath = StringUtils.join(
-                    Arrays.copyOfRange(observerPathArray, 1, observerPathArray.length - 1), "\\"
-            );
-
-            observer.addRow(this.generateRow(PDOModel.PDO_OBSERVER_PATH, observerPath));
-            observer.addRow(this.generateRow(PDOModel.PDO_OBSERVER_CD, performer.getReference().getIdPart()));
-            observerSet.addElement(observer);
-        }
-
-        return observerSet;
-
-    }
-
 }

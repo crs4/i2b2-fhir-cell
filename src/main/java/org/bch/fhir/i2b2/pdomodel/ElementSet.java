@@ -58,6 +58,8 @@ public class ElementSet {
         this.elements.remove(element);
     }
 
+    public List<Element> getElements() { return this.elements; }
+
     /**
      * Returns the element set as String
      * @return  The String

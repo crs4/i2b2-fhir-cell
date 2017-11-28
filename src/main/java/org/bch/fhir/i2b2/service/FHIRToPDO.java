@@ -5,6 +5,7 @@ import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import org.bch.fhir.i2b2.config.AppConfig;
 import org.bch.fhir.i2b2.exception.FHIRI2B2Exception;
 import org.bch.fhir.i2b2.pdomodel.Element;
@@ -259,6 +260,16 @@ public abstract class FHIRToPDO {
         out.addRow(pdoConceptCd);
 
         observationSet.addElement(out);
+    }
+
+    protected void addDate(Element element, DateTimeDt datetime) throws FHIRI2B2Exception {
+        if (datetime != null) {
+            String outputDataFormat = AppConfig.getProp(AppConfig.FORMAT_DATE_I2B2);
+            SimpleDateFormat dateFormatOutput = new SimpleDateFormat(outputDataFormat);
+            String startDateStr = dateFormatOutput.format( datetime.getValue());
+            element.addRow(this.generateRow(PDOModel.PDO_START_DATE, startDateStr));
+            element.addRow(this.generateRow(PDOModel.PDO_END_DATE, startDateStr));
+        }
     }
 
 }

@@ -3,7 +3,9 @@ package org.bch.fhir.i2b2.pdomodel;
 import org.bch.fhir.i2b2.exception.FHIRI2B2Exception;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implements the construction of a PDO XML ready to be pushed to a i2b2 instance
@@ -50,14 +52,14 @@ public class PDOModel {
                 "    xsi:schemaLocation=\"http://i2b2.mgh.harvard.edu/repository_cell/patient_data.xsd\">\n";
     private static String PDO_FOOT = "</repository:patient_data>";
 
-    private List<ElementSet> elementSets = new ArrayList<>();
+    private Map<String, ElementSet> elementSets = new HashMap<>();
 
     /**
      * Adds an {@link ElementSet} object in the pdo document
      * @param elementSet
      */
     public void addElementSet(ElementSet elementSet) {
-        this.elementSets.add(elementSet);
+        this.elementSets.put(elementSet.getTypePDOSet(), elementSet);
     }
 
     /**
@@ -65,8 +67,10 @@ public class PDOModel {
      * @param elementSet
      */
     public void removeElementSet(ElementSet elementSet) {
-        this.elementSets.remove(elementSet);
+        this.elementSets.remove(elementSet.getTypePDOSet());
     }
+
+    public ElementSet getElementSet(String elementName) { return this.elementSets.get(elementName); }
 
     /**
      * Returns the pdo xml document as String
@@ -76,7 +80,7 @@ public class PDOModel {
     public String generatePDOXML() throws FHIRI2B2Exception {
         StringBuffer out = new StringBuffer();
         out.append(PDO_HEADER);
-        for(ElementSet e: this.elementSets) {
+        for(ElementSet e: this.elementSets.values()) {
             out.append(e.toPDOString());
         }
         out.append(PDO_FOOT);
