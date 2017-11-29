@@ -17,6 +17,7 @@ public class EncounterToI2B2 extends FHIRToPDO  {
 
         this.eventIde = this.getEventId(enc);
         this.patientIde = getPatientId(enc);
+        this.eventIdeSource = enc.getServiceProvider().getReference().getIdPart();
 
         PDOModel pdo = new PDOModel();
         pdo.addElementSet(generateEventSet(enc));

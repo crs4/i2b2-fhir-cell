@@ -46,11 +46,16 @@ public class EncounterToI2B2Test extends BaseTest {
         NodeList eventList = (NodeList) xpath.evaluate("/patient_data/event_set/event", doc, XPathConstants.NODESET);
         assertEquals(eventList.getLength(), 1);
         Node eventId = (Node) xpath.evaluate(
-                String.format("/patient_data/event_set/event/event_id[text()='%s']", enc.getId().getIdPart()),
+                String.format(
+                        "/patient_data/event_set/event/event_id[@source='%s'][text()='%s']",
+                        enc.getServiceProvider().getReference().getIdPart(),
+                        enc.getId().getIdPart()
+                ),
                 doc,
                 XPathConstants.NODE
         );
         assertNotNull(eventId);
+
         Node patientId = (Node) xpath.evaluate(
                 String.format("/patient_data/event_set/event/patient_id[text()='%s']", enc.getPatient().getReference().getIdPart()),
                 doc,
