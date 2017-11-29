@@ -1,6 +1,7 @@
 package org.bch.fhir.i2b2.service;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.parser.IParser;
 import org.junit.Assert;
@@ -27,29 +28,11 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Created by mauro on 20/11/17.
  */
-public class DiagnosticReportToI2B2Test {
-    protected FhirContext ctx = FhirContext.forDstu2();
-
-    private  DiagnosticReport parseFile(String fileName) throws Exception {
-        IParser parser = ctx.newJsonParser();
-        InputStream in = DiagnosticReportToI2B2Test.class.getResourceAsStream(fileName);
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        return parser.parseResource(DiagnosticReport.class, br);
-
-    }
-
-    private static Document parseXMLString(String xml) throws ParserConfigurationException, IOException,  org.xml.sax.SAXException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setValidating(false);
-        factory.setIgnoringElementContentWhitespace(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        InputSource is = new InputSource(new StringReader(xml));
-        return builder.parse(is);
-    }
+public class DiagnosticReportToI2B2Test extends BaseTest {
 
     @Test
     public void basicTest() throws Exception {
-        DiagnosticReport report = parseFile("DiagnosticReport.json");
+        DiagnosticReport report = (DiagnosticReport) parseFile(DiagnosticReport.class, "DiagnosticReport.json");
         DiagnosticReportToI2B2 diagnosticReportToI2B2 = new DiagnosticReportToI2B2();
         String xml = diagnosticReportToI2B2.getPDOXML(report);
         String source = "http://fake_fse.it";
