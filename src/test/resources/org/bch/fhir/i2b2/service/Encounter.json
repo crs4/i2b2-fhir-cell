@@ -1,0 +1,32 @@
+{
+  "resourceType" : "Encounter",
+  "id": "1850924811",
+  "status" : "finished",
+  "class" : {
+    "system": "",
+    "code": "1",
+    "display": "RICOVERO"
+  },
+  "patient" : {
+    "reference": "Patient/7996923"
+  },
+  "period": {
+    "start": "1850-06-11",
+    "end": "1850-06-19"
+  },
+  "diagnosis": [
+    {
+      "condition": {
+        "display": "torace"
+      }
+    },
+    {
+      "condition": {
+        "display": "bacino"
+      }
+    }
+  ],
+  "serviceProvider" : {
+    "reference": "Organization/FRIULI VENEZIA GIULIA/I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO"
+  }
+}
