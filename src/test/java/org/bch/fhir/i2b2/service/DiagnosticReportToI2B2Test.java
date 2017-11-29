@@ -32,7 +32,7 @@ public class DiagnosticReportToI2B2Test {
 
     private  DiagnosticReport parseFile(String fileName) throws Exception {
         IParser parser = ctx.newJsonParser();
-        InputStream in = QAnswerToI2B2Test.class.getResourceAsStream(fileName);
+        InputStream in = DiagnosticReportToI2B2Test.class.getResourceAsStream(fileName);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         return parser.parseResource(DiagnosticReport.class, br);
 
