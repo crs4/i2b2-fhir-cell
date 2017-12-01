@@ -99,9 +99,9 @@ public class DiagnosticReportToI2B2Test extends BaseTest {
         Node observationDiagnosisEventID2 = (Node) xpath.evaluate("/patient_data/observation_set/*[2]/event_id[text()='483572']", doc, XPathConstants.NODE);
         assertNotNull(observationDiagnosisEventID2);
 //
-        Node observationDiagnosisObserverCD1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/observer_cd", doc, XPathConstants.NODE);
-        assertNotNull(observationDiagnosisObserverCD1);
-        assertEquals(observationDiagnosisObserverCD1.getTextContent(), "I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO");
+//        Node observationDiagnosisObserverCD1 = (Node) xpath.evaluate("/patient_data/observation_set/*[1]/observer_cd", doc, XPathConstants.NODE);
+//        assertNotNull(observationDiagnosisObserverCD1);
+//        assertEquals(observationDiagnosisObserverCD1.getTextContent(), "I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO");
 
         Node observationObserverCD2 = (Node) xpath.evaluate("/patient_data/observation_set/*[2]/observer_cd", doc, XPathConstants.NODE);
         assertNotNull(observationObserverCD2);

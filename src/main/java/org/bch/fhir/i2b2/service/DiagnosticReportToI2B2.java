@@ -2,9 +2,12 @@ package org.bch.fhir.i2b2.service;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import org.apache.axis2.databinding.types.soapencoding.DateTime;
@@ -32,17 +35,39 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
     public String getPDOXML(BaseResource resource) throws FHIRI2B2Exception {
         this.report = (DiagnosticReport) resource;
         Observation obs = new Observation();
+        Encounter enc = new Encounter();
+        enc.setId(report.getEncounter().getReference().getIdPart());
+
+        PeriodDt period;
+        try {
+            period = (PeriodDt) report.getEffective();
+
+        }
+        catch (ClassCastException castException) {
+            period = new PeriodDt();
+            DateTimeDt datetime = (DateTimeDt) report.getEffective();
+            period.setStart(datetime);
+            period.setEnd(datetime);
+
+        }
+        enc.setPeriod(period);
+        obs.setEffective(period.getStartElement());
 
         obs.setEncounter(report.getEncounter());
         obs.setSubject(report.getSubject());
         obs.setCode(report.getCodedDiagnosis().get(0));
         obs.setValue(report.getCodedDiagnosis().get(0).getCoding().get(0).getDisplayElement());
-        obs.setEffective(report.getEffective());
+//        obs.setEffective(report.getEffective());
         List<ResourceReferenceDt> performerList = new ArrayList<>();
         performerList.add(report.getPerformer());
         obs.setPerformer(performerList);
-
+        ContainedDt contained = new ContainedDt();
+        List<IResource> containedList = new ArrayList<>();
+        containedList.add(enc);
+        contained.setContainedResources(containedList);
+        obs.setContained(contained);
         PDOModel pdoModel = observationToI2B2.getPDO(obs);
+
 
         System.out.println("this.report.getContained().getContainedResources().size() " + this.report.getContained().getContainedResources().size());
         for (IResource ir : this.report.getContained().getContainedResources()){
@@ -63,6 +88,11 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
                 }
             }
         }
+
+
+//        this.eventIde = this.getEventId(enc);
+//        this.patientIde = this.eventIde;
+//        pdoModel.addElementSet(generateEventSet(enc));
 
         return pdoModel.generatePDOXML();
     }
