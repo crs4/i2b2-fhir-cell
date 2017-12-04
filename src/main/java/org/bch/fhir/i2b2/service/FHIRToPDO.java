@@ -32,6 +32,9 @@ public abstract class FHIRToPDO {
      */
     public abstract String getPDOXML(BaseResource resource) throws FHIRI2B2Exception;
 
+    protected abstract PDOModel getPDO(BaseResource resource) throws FHIRI2B2Exception;
+
+
     public static final String METADATA_CONCEPT_CD = "META";
 
     public static final String FHIR_TAG_VALUE_QUANTITY = "valueQuantity";
@@ -274,11 +277,7 @@ public abstract class FHIRToPDO {
     }
 
     protected Patient getPatient(IResource resource){
-        System.out.println(" resource.getContained().getContainedResources().size()" + resource.getContained().getContainedResources().size());
-
         for (IResource containedRes: resource.getContained().getContainedResources()) {
-            System.out.println("containedRes instanceof Patient " + (containedRes instanceof Patient));
-            System.out.println("containedRes.getClass().getName() " + containedRes.getClass().getName());
             if (containedRes instanceof Patient) {
                 return (Patient) containedRes;
             }

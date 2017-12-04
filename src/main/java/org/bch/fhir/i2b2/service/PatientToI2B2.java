@@ -43,6 +43,10 @@ public class PatientToI2B2 extends FHIRToPDO {
      */
     @Override
     public String getPDOXML(BaseResource resource) throws FHIRI2B2Exception {
+        return getPDO(resource).generatePDOXML();
+    }
+    @Override
+    protected PDOModel getPDO(BaseResource resource) throws FHIRI2B2Exception {
 
         PDOModel pdo = new PDOModel();
         Patient patient = (Patient) resource;
@@ -68,7 +72,7 @@ public class PatientToI2B2 extends FHIRToPDO {
             pdo.addElementSet(pidSet);
         }
 
-        return pdo.generatePDOXML();
+        return pdo;
     }
 
     protected void addColumnParam(Element patientElement, String columnName, String type, Object value) {

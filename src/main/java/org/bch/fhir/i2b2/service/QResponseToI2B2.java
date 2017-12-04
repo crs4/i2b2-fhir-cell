@@ -43,6 +43,10 @@ public class QResponseToI2B2 extends FHIRToPDO {
      */
     @Override
     public String getPDOXML(BaseResource resource) throws FHIRI2B2Exception {
+        return getPDO(resource).generatePDOXML();
+    }
+
+    protected PDOModel getPDO(BaseResource resource) throws FHIRI2B2Exception {
         QuestionnaireResponse qa = (QuestionnaireResponse) resource;
         PDOModel pdo = new PDOModel();
         if (qa!=null) {
@@ -64,7 +68,7 @@ public class QResponseToI2B2 extends FHIRToPDO {
             String metaInfo = "QuestionnaireAnswers#" + ref;
             addMetadataInObservationSet(metaInfo, METADATA_CONCEPT_CD, observationSet);
         }
-        return pdo.generatePDOXML();
+        return pdo;
     }
 
     private String getQReference(QuestionnaireResponse qa) {

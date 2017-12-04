@@ -72,6 +72,12 @@ public class PDOModel {
 
     public ElementSet getElementSet(String elementName) { return this.elementSets.get(elementName); }
 
+    public List<ElementSet> getElementSets() {return new ArrayList<>(this.elementSets.values());}
+
+    public boolean hasElementSet(String elementSet) {
+        return this.elementSets.containsKey(elementSet);
+    }
+
     /**
      * Returns the pdo xml document as String
      * @return  The entire document

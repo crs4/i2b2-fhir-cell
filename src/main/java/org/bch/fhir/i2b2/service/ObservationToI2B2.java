@@ -171,22 +171,35 @@ public class ObservationToI2B2 extends FHIRToPDO {
     protected PDOModel getPDO(BaseResource resource) throws FHIRI2B2Exception {
         Observation obs = (Observation) resource;
         PDOModel pdo = new PDOModel();
-        System.out.println("obs == null " + obs == null);
+        Patient patient = null;
+
         if (obs!=null) {
+            for (IResource containedRes: resource.getContained().getContainedResources()) {
+                PDOModel containedPDO = null;
+                if (containedRes instanceof Patient) {
+                    patient = (Patient) containedRes;
+                    System.out.println("patient "  + patient);
+                    containedPDO = new PatientToI2B2().getPDO(patient);
+                }
+                System.out.println("containedPDO != null "  + containedPDO != null);
+                if (containedPDO != null) {
+                    System.out.println("containedPDO.generatePDOXML() "  + containedPDO.generatePDOXML());
+                    for (ElementSet elementSet: containedPDO.getElementSets()) {
+                        System.out.println("elementSet "  + elementSet);
+                        pdo.addElementSet(elementSet);
+                    }
+                }
+
+            }
+
             String uri = obs.getSubject().getReference().getBaseUrl();
-            System.out.println("uri " + uri);
             if (uri != null) {
                 this.patientIdeSource = uri;
             }
-            else {
-                Patient patient = getPatient(resource);
-                System.out.println("patient == null" + patient == null);
-                if (patient != null) {
-                    String org = patient.getManagingOrganization().getDisplay().getValue();
-                    System.out.println("org.isEmpty() " + org.isEmpty());
-                    this.patientIdeSource = org != null? org: "@";
-                }
-
+            else if (patient != null) {
+                String org = patient.getManagingOrganization().getDisplay().getValue();
+                System.out.println("org.isEmpty() " + org.isEmpty());
+                this.patientIdeSource = org != null? org: "@";
             }
 
             this.patientIde = this.getPatientId(obs);
@@ -195,12 +208,16 @@ public class ObservationToI2B2 extends FHIRToPDO {
             ElementSet eidSet = this.generateEIDSet();
             ElementSet pidSet = this.generatePIDSet();
             ElementSet eventSet = this.generateEventSet(enc);
-            ElementSet patientSet = this.generatePatientSet();
+
+            if (!pdo.hasElementSet(ElementSet.PDO_PATIENT_SET)) {
+                pdo.addElementSet(this.generatePatientSet());
+            }
+
             ElementSet observationSet = this.generateObservationSet(obs);
             pdo.addElementSet(eidSet);
             pdo.addElementSet(pidSet);
             pdo.addElementSet(eventSet);
-            pdo.addElementSet(patientSet);
+
             pdo.addElementSet(observationSet);
             pdo.addElementSet(generateConceptSet(obs));
 
@@ -210,6 +227,7 @@ public class ObservationToI2B2 extends FHIRToPDO {
 //            addMetadataInObservationSet("Observation", METADATA_CONCEPT_CD, observationSet);
         }
         return pdo;
+
     }
 
     protected ElementSet generateConceptSet(Observation obs) throws FHIRI2B2Exception {

@@ -33,6 +33,11 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
 
     @Override
     public String getPDOXML(BaseResource resource) throws FHIRI2B2Exception {
+        return getPDO(resource).generatePDOXML();
+    }
+
+    @Override
+    protected PDOModel getPDO(BaseResource resource) throws FHIRI2B2Exception {
         this.report = (DiagnosticReport) resource;
         Observation obs = new Observation();
         Encounter enc = new Encounter();
@@ -55,8 +60,10 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
 
         obs.setEncounter(report.getEncounter());
         obs.setSubject(report.getSubject());
-        obs.setCode(report.getCodedDiagnosis().get(0));
-        obs.setValue(report.getCodedDiagnosis().get(0).getCoding().get(0).getDisplayElement());
+        if (!report.getCodedDiagnosis().isEmpty()) {
+            obs.setCode(report.getCodedDiagnosis().get(0));
+            obs.setValue(report.getCodedDiagnosis().get(0).getCoding().get(0).getDisplayElement());
+        }
 //        obs.setEffective(report.getEffective());
         List<ResourceReferenceDt> performerList = new ArrayList<>();
         performerList.add(report.getPerformer());
@@ -96,6 +103,6 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
 //        this.patientIde = this.eventIde;
 //        pdoModel.addElementSet(generateEventSet(enc));
 
-        return pdoModel.generatePDOXML();
+        return pdoModel;
     }
 }
