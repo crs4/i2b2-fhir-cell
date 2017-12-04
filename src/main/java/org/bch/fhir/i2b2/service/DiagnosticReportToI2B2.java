@@ -62,7 +62,7 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         performerList.add(report.getPerformer());
         obs.setPerformer(performerList);
         ContainedDt contained = new ContainedDt();
-        List<IResource> containedList = new ArrayList<>();
+        List<IResource> containedList = report.getContained().getContainedResources();
         containedList.add(enc);
         contained.setContainedResources(containedList);
         obs.setContained(contained);
@@ -71,20 +71,22 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
 
         System.out.println("this.report.getContained().getContainedResources().size() " + this.report.getContained().getContainedResources().size());
         for (IResource ir : this.report.getContained().getContainedResources()){
-            PDOModel containedPDO = observationToI2B2.getPDO((BaseResource) ir);
+            if (ir instanceof Observation) {
+                PDOModel containedPDO = observationToI2B2.getPDO((BaseResource) ir);
 
-            String [] pdo_set_array = new String[]{
-                    ElementSet.PDO_OBSERVATION_SET,
-                    ElementSet.PDO_EVENT_SET,
-                    ElementSet.PDO_EID_SET,
+                String [] pdo_set_array = new String[]{
+                        ElementSet.PDO_OBSERVATION_SET,
+                        ElementSet.PDO_EVENT_SET,
+                        ElementSet.PDO_EID_SET,
 //                    ElementSet.PDO_PATIENT_SET,
-                    ElementSet.PDO_PID_SET,
-                    ElementSet.PDO_CONCEPT_SET,
-            };
+                        ElementSet.PDO_PID_SET,
+                        ElementSet.PDO_CONCEPT_SET,
+                };
 
-            for (String pdo_set: pdo_set_array) {
-                for(Element el: containedPDO.getElementSet(pdo_set).getElements()) {
-                    pdoModel.getElementSet(pdo_set).addElement(el);
+                for (String pdo_set: pdo_set_array) {
+                    for(Element el: containedPDO.getElementSet(pdo_set).getElements()) {
+                        pdoModel.getElementSet(pdo_set).addElement(el);
+                    }
                 }
             }
         }

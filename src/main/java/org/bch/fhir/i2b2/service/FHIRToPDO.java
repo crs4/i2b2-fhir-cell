@@ -5,6 +5,7 @@ import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import org.bch.fhir.i2b2.config.AppConfig;
 import org.bch.fhir.i2b2.exception.FHIRI2B2Exception;
@@ -270,6 +271,19 @@ public abstract class FHIRToPDO {
             element.addRow(this.generateRow(PDOModel.PDO_START_DATE, startDateStr));
             element.addRow(this.generateRow(PDOModel.PDO_END_DATE, startDateStr));
         }
+    }
+
+    protected Patient getPatient(IResource resource){
+        System.out.println(" resource.getContained().getContainedResources().size()" + resource.getContained().getContainedResources().size());
+
+        for (IResource containedRes: resource.getContained().getContainedResources()) {
+            System.out.println("containedRes instanceof Patient " + (containedRes instanceof Patient));
+            System.out.println("containedRes.getClass().getName() " + containedRes.getClass().getName());
+            if (containedRes instanceof Patient) {
+                return (Patient) containedRes;
+            }
+        }
+        return null;
     }
 
 }

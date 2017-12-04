@@ -9,6 +9,7 @@ import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -178,7 +179,14 @@ public class ObservationToI2B2 extends FHIRToPDO {
                 this.patientIdeSource = uri;
             }
             else {
-                this.patientIdeSource = "@";
+                Patient patient = getPatient(resource);
+                System.out.println("patient == null" + patient == null);
+                if (patient != null) {
+                    String org = patient.getManagingOrganization().getDisplay().getValue();
+                    System.out.println("org.isEmpty() " + org.isEmpty());
+                    this.patientIdeSource = org != null? org: "@";
+                }
+
             }
 
             this.patientIde = this.getPatientId(obs);
