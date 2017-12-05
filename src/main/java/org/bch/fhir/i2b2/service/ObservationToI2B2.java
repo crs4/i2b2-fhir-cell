@@ -172,60 +172,91 @@ public class ObservationToI2B2 extends FHIRToPDO {
         Observation obs = (Observation) resource;
         PDOModel pdo = new PDOModel();
         Patient patient = null;
+        this.patientIde = obs.getSubject().getReference().getIdPart();
+        String encounterId = obs.getEncounter().getReference().getIdPart();
 
-        if (obs!=null) {
-            for (IResource containedRes: resource.getContained().getContainedResources()) {
-                PDOModel containedPDO = null;
-                if (containedRes instanceof Patient) {
-                    patient = (Patient) containedRes;
-                    System.out.println("patient "  + patient);
-                    containedPDO = new PatientToI2B2().getPDO(patient);
+        Encounter enc = null;
+        PDOModel containedPDO;
+        System.out.println("resource.getContained().getContainedResources().size() " + resource.getContained().getContainedResources().size());
+        for (IResource containedRes: resource.getContained().getContainedResources()) {
+            log.info("containedRes.getResourceName() " + containedRes.getResourceName() + containedRes.getId().getValue());
+            containedPDO = null;
+            if (containedRes instanceof Patient && containedRes.getId().getIdPart().equals(this.patientIde)) {
+                log.info("contained patient found");
+                patient = (Patient) containedRes;
+                containedPDO = new PatientToI2B2().getPDO(patient);
+
+            }
+            else if(containedRes instanceof Encounter && containedRes.getId().getValue().equals(encounterId)) {
+                enc = (Encounter) containedRes;
+
+                this.eventIde = this.getEventId(enc);
+
+//              FIXME: this is a hack
+                if (enc.getPatient().isEmpty()) {
+                    enc.setPatient(obs.getSubject());
                 }
-                System.out.println("containedPDO != null "  + containedPDO != null);
-                if (containedPDO != null) {
-                    System.out.println("containedPDO.generatePDOXML() "  + containedPDO.generatePDOXML());
-                    for (ElementSet elementSet: containedPDO.getElementSets()) {
-                        System.out.println("elementSet "  + elementSet);
-                        pdo.addElementSet(elementSet);
-                    }
+//                if (enc.getServiceProvider().isEmpty()) {
+//                    enc.setServiceProvider(obs.getPerformer().get(0));
+//                }
+//
+//                this.eventIdeSource = enc.getServiceProvider().getReference().getIdPart();
+
+                try {
+                    containedPDO = new EncounterToI2B2().getPDO(enc);
                 }
-
+                catch (FHIRI2B2Exception ex) {
+                    log.error(ex);
+                    log.error("skipping pdo from contained encounter");
+                }
+            }
+            if (containedPDO != null) {
+                for (ElementSet elementSet: containedPDO.getElementSets()) {
+                    log.info("adding " + elementSet.getTypePDOSet());
+                    pdo.addElementSet(elementSet);
+                }
             }
 
-            String uri = obs.getSubject().getReference().getBaseUrl();
-            if (uri != null) {
-                this.patientIdeSource = uri;
-            }
-            else if (patient != null) {
-                String org = patient.getManagingOrganization().getDisplay().getValue();
-                System.out.println("org.isEmpty() " + org.isEmpty());
-                this.patientIdeSource = org != null? org: "@";
-            }
-
-            this.patientIde = this.getPatientId(obs);
-            Encounter enc = findEncounter(obs);
-            this.eventIde = this.getEventId(enc);
-            ElementSet eidSet = this.generateEIDSet();
-            ElementSet pidSet = this.generatePIDSet();
-            ElementSet eventSet = this.generateEventSet(enc);
-
-            if (!pdo.hasElementSet(ElementSet.PDO_PATIENT_SET)) {
-                pdo.addElementSet(this.generatePatientSet());
-            }
-
-            ElementSet observationSet = this.generateObservationSet(obs);
-            pdo.addElementSet(eidSet);
-            pdo.addElementSet(pidSet);
-            pdo.addElementSet(eventSet);
-
-            pdo.addElementSet(observationSet);
-            pdo.addElementSet(generateConceptSet(obs));
-
-
-
-            // We add metadata for admin purposes
-//            addMetadataInObservationSet("Observation", METADATA_CONCEPT_CD, observationSet);
         }
+
+        String uri = obs.getSubject().getReference().getBaseUrl();
+        if (uri != null) {
+            this.patientIdeSource = uri;
+        }
+        else if (patient != null) {
+            String org = patient.getManagingOrganization().getDisplay().getValue();
+            this.patientIdeSource = org != null? org: "@";
+        }
+        if (enc == null) {
+            enc = new Encounter();
+            enc.setId(encounterId);
+        }
+
+//            Encounter enc = findEncounter(obs);
+        this.eventIde = this.getEventId(enc);
+        if (!pdo.hasElementSet(ElementSet.PDO_PATIENT_SET)) {
+            pdo.addElementSet(this.generatePatientSet());
+        }
+
+        ElementSet eidSet = this.generateEIDSet();
+        ElementSet pidSet = this.generatePIDSet();
+        if (!pdo.hasElementSet(ElementSet.PDO_EVENT_SET)) {
+            pdo.addElementSet(this.generateEventSet(enc));
+        }
+
+        ElementSet observationSet = this.generateObservationSet(obs);
+        pdo.addElementSet(eidSet);
+        pdo.addElementSet(pidSet);
+
+
+        pdo.addElementSet(observationSet);
+        pdo.addElementSet(generateConceptSet(obs));
+
+
+
+        // We add metadata for admin purposes
+//            addMetadataInObservationSet("Observation", METADATA_CONCEPT_CD, observationSet);
+
         return pdo;
 
     }

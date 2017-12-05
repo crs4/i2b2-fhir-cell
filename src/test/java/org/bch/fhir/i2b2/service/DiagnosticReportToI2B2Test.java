@@ -43,7 +43,7 @@ public class DiagnosticReportToI2B2Test extends BaseTest {
 
         Node patientSetPatientID = (Node) xpath.evaluate("/patient_data/pid_set/pid/patient_id", doc, XPathConstants.NODE);
         String patientID = patientSetPatientID.getTextContent();
-        assertEquals(patientID, "7996923");
+        assertEquals("7996923", patientID);
 
         NodeList observationList = doc.getElementsByTagName("observation");
         Assert.assertTrue(observationList.getLength() == 2);

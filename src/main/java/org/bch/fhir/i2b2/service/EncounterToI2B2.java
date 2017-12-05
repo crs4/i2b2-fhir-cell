@@ -30,7 +30,7 @@ public class EncounterToI2B2 extends FHIRToPDO  {
         this.patientIde = getPatientId(enc);
         System.out.println("this.patientIde " + this.patientIde);
 //        this.eventIdeSource = enc.getServiceProvider().getReference().getIdPart();
-        this.eventIdeSource = "HIVE";
+        this.eventIdeSource = enc.getServiceProvider().getReference().getValueAsString();
         this.patientIdeSource = this.eventIdeSource;
         PDOModel pdo = new PDOModel();
         pdo.addElementSet(generateEventSet(enc));
@@ -40,7 +40,7 @@ public class EncounterToI2B2 extends FHIRToPDO  {
 
     protected  String getPatientId(Encounter enc) throws FHIRI2B2Exception {
         ResourceReferenceDt refPatient = enc.getPatient();
-        if (refPatient.isEmpty()) throw new FHIRI2B2Exception("Subject reference is not informed");
+//        if (refPatient.isEmpty()) throw new FHIRI2B2Exception("Subject reference is not informed");
         return refPatient.getReference().getIdPart();
     }
 }
