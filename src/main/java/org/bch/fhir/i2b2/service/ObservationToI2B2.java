@@ -89,9 +89,6 @@ public class ObservationToI2B2 extends FHIRToPDO {
         Map<String, String> mapConceptCode = AppConfig.getRealConceptCodesObsMap();
         Map<String, String> mapConceptCodeType = AppConfig.getRealConceptCodesTypeObsMap();
 
-        System.out.println(mapConceptCodeType.toString());
-        System.out.println(mapConceptCode.toString());
-
         String pdoEventId = this.generateRow(PDOModel.PDO_EVENT_ID, this.eventIde,
                 this.genParamStr(PDOModel.PDO_SOURCE, this.eventIdeSource));
         out.addRow(pdoEventId);
@@ -171,72 +168,10 @@ public class ObservationToI2B2 extends FHIRToPDO {
     protected PDOModel getPDO(BaseResource resource) throws FHIRI2B2Exception {
         Observation obs = (Observation) resource;
         PDOModel pdo = new PDOModel();
-        Patient patient = null;
-        this.patientIde = obs.getSubject().getReference().getIdPart();
-        String encounterId = obs.getEncounter().getReference().getIdPart();
 
-        Encounter enc = null;
-        PDOModel containedPDO;
-        System.out.println("resource.getContained().getContainedResources().size() " + resource.getContained().getContainedResources().size());
-        for (IResource containedRes: resource.getContained().getContainedResources()) {
-            log.info("containedRes.getResourceName() " + containedRes.getResourceName() + containedRes.getId().getValue());
-            containedPDO = null;
-            if (containedRes instanceof Patient && containedRes.getId().getIdPart().equals(this.patientIde)) {
-                log.info("contained patient found");
-                patient = (Patient) containedRes;
-                containedPDO = new PatientToI2B2().getPDO(patient);
-
-            }
-            else if(containedRes instanceof Encounter && containedRes.getId().getValue().equals(encounterId)) {
-                enc = (Encounter) containedRes;
-
-                this.eventIde = this.getEventId(enc);
-
-//              FIXME: this is a hack
-                if (enc.getPatient().isEmpty()) {
-                    enc.setPatient(obs.getSubject());
-                }
-//                if (enc.getServiceProvider().isEmpty()) {
-//                    enc.setServiceProvider(obs.getPerformer().get(0));
-//                }
-//
-//                this.eventIdeSource = enc.getServiceProvider().getReference().getIdPart();
-
-                try {
-                    containedPDO = new EncounterToI2B2().getPDO(enc);
-                }
-                catch (FHIRI2B2Exception ex) {
-                    log.error(ex);
-                    log.error("skipping pdo from contained encounter");
-                }
-            }
-            if (containedPDO != null) {
-                for (ElementSet elementSet: containedPDO.getElementSets()) {
-                    log.info("adding " + elementSet.getTypePDOSet());
-                    pdo.addElementSet(elementSet);
-                }
-            }
-
-        }
-
-        String uri = obs.getSubject().getReference().getBaseUrl();
-        if (uri != null) {
-            this.patientIdeSource = uri;
-        }
-        else if (patient != null) {
-            String org = patient.getManagingOrganization().getDisplay().getValue();
-            this.patientIdeSource = org != null? org: "@";
-        }
-        if (enc == null) {
-            enc = new Encounter();
-            enc.setId(encounterId);
-        }
-
-//            Encounter enc = findEncounter(obs);
+        this.patientIde = this.getPatientId(obs);
+        Encounter enc = findEncounter(obs);
         this.eventIde = this.getEventId(enc);
-        if (!pdo.hasElementSet(ElementSet.PDO_PATIENT_SET)) {
-            pdo.addElementSet(this.generatePatientSet());
-        }
 
         ElementSet eidSet = this.generateEIDSet();
         ElementSet pidSet = this.generatePIDSet();
@@ -248,17 +183,13 @@ public class ObservationToI2B2 extends FHIRToPDO {
         pdo.addElementSet(eidSet);
         pdo.addElementSet(pidSet);
 
-
         pdo.addElementSet(observationSet);
         pdo.addElementSet(generateConceptSet(obs));
 
-
-
-        // We add metadata for admin purposes
+// We add metadata for admin purposes
 //            addMetadataInObservationSet("Observation", METADATA_CONCEPT_CD, observationSet);
 
         return pdo;
-
     }
 
     protected ElementSet generateConceptSet(Observation obs) throws FHIRI2B2Exception {
