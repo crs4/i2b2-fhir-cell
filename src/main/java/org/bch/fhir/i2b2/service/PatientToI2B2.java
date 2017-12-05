@@ -58,7 +58,7 @@ public class PatientToI2B2 extends FHIRToPDO {
                 throw new FHIRI2B2Exception("Patient id cannot be empty");
             }
             org = patient.getManagingOrganization();
-            if (!org.isEmpty()) {
+            if ( org != null || !org.isEmpty()) {
                 this.patientIdeSource = org.getReference().getIdPart();
             }
             else {
@@ -153,8 +153,8 @@ public class PatientToI2B2 extends FHIRToPDO {
         if (communication!= null && !communication.isEmpty())
             addColumnParam(patientElement, PDOModel.PDO_LANGUAGE, "string", communication.get(0).getLanguage().getText());
 
-        if (!org.isEmpty())
-            addColumnParam(patientElement, PDOModel.PDO_SOURCESYSTEM_CD, "string", org.getDisplay());
+        if (org != null && !org.isEmpty())
+            addColumnParam(patientElement, PDOModel.PDO_SOURCESYSTEM_CD, "string", org.getReference().getIdPart());
 
         BoundCodeableConceptDt<MaritalStatusCodesEnum> maritalStatus = patient.getMaritalStatus();
         if (!maritalStatus.isEmpty()) {
