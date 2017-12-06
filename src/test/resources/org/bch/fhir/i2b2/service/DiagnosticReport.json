@@ -6,45 +6,30 @@
       "coding": [
         {
           "system": "",
-          "code": "",
+          "code": "ANATOMIA PATOLOGICA",
           "display": "ANATOMIA PATOLOGICA"
         }
       ]
     }
   ],
-  "encounter": {
-    "reference": "Encounter/483572"
+
+  "subject": {
+    "reference": "7996923"
   },
 
-  "code": {
-    "coding": [
-      {
-        "system": "http://snomed.info/sct",
-        "code": "45036003",
-        "display": "Ultrasonography of abdomen"
-      }
-    ],
-    "text": "Abdominal Ultrasound"
-  },
-  "subject": {
-    "reference": "Patient/7996923"
-  },
   "effectiveDateTime": "1850-06-12",
-  "issued": "2012-12-01T12:00:00+01:00",
+
   "performer": [{
-    "reference": "Organization/FRIULI VENEZIA GIULIA/I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO",
+    "reference": "Organization/I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO",
     "display": "I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO"
   }
   ],
-  "image": [
-    {
-      "comment": "A comment about the image",
-      "link": {
-        "reference": "Media/1.2.840.11361907579238403408700.3.0.14.19970327150033",
-        "display": "WADO example image"
-      }
-    }
-  ],
+
+  "encounter": {
+    "reference": "185055488771"
+  }
+,
+
 
   "codedDiagnosis": [
 
@@ -63,56 +48,55 @@
 
 
   ],
+
+
   "contained": [
+
+
     {
-      "resourceType": "Observation",
-      "id": "r1",
-      "status": "final",
-      "encounter": {
-        "reference": "Encounter/483572"
+      "resourceType": "Patient",
+      "id": "7996923",
+
+      "managingOrganization": {
+        "reference": "Organization/I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO",
+        "display": "I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO"
       },
-      "effectiveDateTime": "1850-06-12",
-      "code": {
-        "coding": [
-          {
-            "system": "",
-            "code": "185055488771",
-            "display": ""
-          }
-        ],
-        "text": "Haemoglobin"
+
+      "gender": "M",
+      "birthDate": "1809-03-27"},
+
+
+
+
+
+    {
+      "resourceType" : "Encounter",
+      "id": "185055488771",
+      "status" :  "finished" ,
+
+
+      "patient" : {
+        "reference": "7996923"
       },
-      "subject": {
-        "reference": "Patient/7996923"
+      "period": {
+        "start": "1850-06-12",
+        "end": "1850-06-12"
       },
-      "performer": [
+      "diagnosis": [
+
+
         {
-          "reference": "Organization/FRIULI VENEZIA GIULIA/I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO",
-          "display": "I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO"
+          "condition": {
+            "display": "Sarcoma, NAS"
+          }
         }
+
+
+
       ],
-      "valueQuantity": {
-        "value": 176,
-        "unit": "g/L",
-        "system": "http://unitsofmeasure.org",
-        "code": "g/L"
-      },
-      "referenceRange": [
-        {
-          "low": {
-            "value": 135,
-            "unit": "g/L",
-            "system": "http://unitsofmeasure.org",
-            "code": "g/L"
-          },
-          "high": {
-            "value": 180,
-            "unit": "g/L",
-            "system": "http://unitsofmeasure.org",
-            "code": "g/L"
-          }
-        }
-      ]
-    }
-  ]
+      "serviceProvider" : {
+        "reference": "Organization/I.R.C.C.S. CENTRO RIFERIMENTO ONCOLOGICO"
+      }
+    }]
+
 }

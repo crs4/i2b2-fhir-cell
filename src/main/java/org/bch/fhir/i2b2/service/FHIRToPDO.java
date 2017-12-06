@@ -5,6 +5,7 @@ import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import org.bch.fhir.i2b2.config.AppConfig;
@@ -283,6 +284,18 @@ public abstract class FHIRToPDO {
             }
         }
         return null;
+    }
+
+    protected ElementSet generateConceptSet(String conceptPath, String conceptCd, String nameChar) throws FHIRI2B2Exception {
+        ElementSet conceptSet = new ElementSet();
+        conceptSet.setTypePDOSet(ElementSet.PDO_CONCEPT_SET);
+        Element concept = new Element();
+        concept.setTypePDO(Element.PDO_CONCEPT);
+        concept.addRow(conceptPath);
+        concept.addRow(conceptCd);
+        concept.addRow(nameChar);
+        conceptSet.addElement(concept);
+        return conceptSet;
     }
 
 }
