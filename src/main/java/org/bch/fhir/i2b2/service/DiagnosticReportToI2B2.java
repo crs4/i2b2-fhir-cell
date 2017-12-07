@@ -43,7 +43,7 @@ public class DiagnosticReportToI2B2 extends FHIRToPDO {
         this.patientIde = report.getSubject().getReference().getIdPart();
         Patient patient = (Patient) findResourceById(report.getContained().getContainedResources(), this.patientIde);
         if (patient != null) {
-//            this.patientIdeSource = patient.getManagingOrganization().getReference().getIdPart();
+            this.patientIdeSource = patient.getManagingOrganization().getReference().getIdPart();
             PatientToI2B2 patientToI2B2 = new PatientToI2B2();
             patientToI2B2.patientIde = this.patientIde;
             patientToI2B2.patientIdeSource = this.patientIdeSource;
