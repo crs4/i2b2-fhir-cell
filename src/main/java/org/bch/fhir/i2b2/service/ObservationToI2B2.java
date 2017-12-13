@@ -210,6 +210,9 @@ public class ObservationToI2B2 extends FHIRToPDO {
 
     private void addValuesPdo(Observation obs, String type, Element out) {
         IDatatype data = obs.getValue();
+        if (data == null)
+            return;
+
         if (type == null) type = FHIR_TAG_VALUE_STRING;
         if (type.equals(FHIR_TAG_VALUE_QUANTITY))  {
             QuantityDt qdt = (QuantityDt) data;
