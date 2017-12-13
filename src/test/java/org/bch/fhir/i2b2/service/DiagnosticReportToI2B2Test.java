@@ -59,8 +59,17 @@ public class DiagnosticReportToI2B2Test extends BaseTest {
         String patientID = patientSetPatientID.getTextContent();
         assertEquals("7996923", patientID);
 
-//        NodeList observationList = doc.getElementsByTagName("observation");
-//        Assert.assertEquals(1, observationList.getLength());
+        NodeList observationList = doc.getElementsByTagName("observation");
+        assertEquals(2, observationList.getLength());
+
+        Node genderConceptCd = (Node) xpath.evaluate("/patient_data/observation_set/observation/concept_cd[text()=" +
+                "'\\i2b2\\Demographics\\Gender\\Male\\']", doc, XPathConstants.NODE);
+        assertNotNull(genderConceptCd);
+
+        Node genderPatientId = (Node) xpath.evaluate("/patient_data/observation_set/observation/concept_cd[text()=" +
+                "'\\i2b2\\Demographics\\Gender\\Male\\']/../patient_id[text()=7996923]", doc, XPathConstants.NODE);
+        assertNotNull(genderPatientId);
+
 //
 ////        NodeList conceptList = doc.getElementsByTagName("concept");
 ////        Assert.assertEquals(1, conceptList.getLength());
