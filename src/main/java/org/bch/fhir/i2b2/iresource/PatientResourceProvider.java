@@ -48,10 +48,8 @@ public class PatientResourceProvider extends BaseResourceProvider implements IRe
     public MethodOutcome create(@ResourceParam Patient patient, HttpServletRequest theRequest) {
         String xmlpdo = null;
         String [] credentials = getCredentials(theRequest);
-        String user = credentials[0];
-        String pwd = credentials[1];
-
         try {
+            i2b2.setCredentials(credentials[0], credentials[1]);
             xmlpdo = mapper.getPDOXML(patient);
             System.out.println(xmlpdo);
             if (xmlpdo!=null) {
